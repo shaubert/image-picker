@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="sh_image_picker_take_picture_chooser_title">Выбрать изображение</string>
+
+    <string name="sh_image_picker_image_edit_dialog_option_open">Открыть</string>
+    <string name="sh_image_picker_image_edit_dialog_option_take_photo">Сделать фото</string>
+    <string name="sh_image_picker_image_edit_dialog_option_choose_picture">Выбрать из\u00A0галереи</string>
+    <string name="sh_image_picker_image_edit_dialog_option_remove">Удалить</string>
+
+    <string name="sh_image_picker_take_photo_processing_error">Ошибка при обрабоке изображения</string>
+    <string name="sh_image_picker_take_photo_loading_error">Ошибка загрузки изображения</string>
+
+    <string name="sh_image_picker_storage_not_available_message">Диск недоступен для записи</string>
+    <string name="sh_image_picker_unable_to_read_file_message">Ошибка чтения файла</string>
+
+    <string name="sh_image_picker_crop_image_too_small">Изображение слишком маленькое</string>
+    <string name="sh_image_picker_crop_image_too_small_format">Размер должен быть не меньше чем %1$d на %2$d</string>
+    <string name="sh_image_picker_crop_image_processing">Обработка…</string>
+
+</resources>

@@ -1,0 +1,88 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:orientation="vertical"
+        android:gravity="center">
+
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/image_3"
+                android:layout_width="192dp"
+                android:layout_height="192dp"
+                android:layout_marginTop="24dp"
+                android:layout_gravity="center"/>
+
+            <ProgressBar
+                android:id="@+id/progress_image_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                style="?android:attr/progressBarStyleLarge"/>
+
+            <TextView
+                android:id="@+id/error_image_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Error (tap to retry)"/>
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/load_3_button"
+            android:layout_width="192dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Pick image"/>
+
+
+
+        <ImageView
+            android:id="@+id/image_4"
+            android:layout_width="192dp"
+            android:layout_height="192dp"
+            android:layout_marginTop="24dp"/>
+
+        <Button
+            android:id="@+id/load_4_button"
+            android:layout_width="192dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Pick and crop image"/>
+
+
+        <Button
+            android:id="@+id/load_5_button"
+            android:layout_width="192dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Pick image without view"/>
+
+
+        <ImageView
+            android:id="@+id/image_6"
+            android:layout_width="192dp"
+            android:layout_height="192dp"
+            android:layout_marginTop="24dp"
+            android:scaleType="centerCrop"/>
+
+        <Button
+            android:id="@+id/load_6_button"
+            android:layout_width="192dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Pick and crop image (with preset image)"/>
+
+    </LinearLayout>
+</ScrollView>

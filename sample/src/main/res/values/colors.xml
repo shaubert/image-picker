@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="disabled_color">#21000000</color>
+    <color name="pressed_color">#CDBDBDBD</color>
+    <color name="longpressed_color">#B3E5FC</color>
+    <color name="focused_color">#99BDBDBD</color>
+
+</resources>

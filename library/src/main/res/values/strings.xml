@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="sh_image_picker_take_picture_chooser_title">Choose image</string>
+
+    <string name="sh_image_picker_image_edit_dialog_option_open">Open</string>
+    <string name="sh_image_picker_image_edit_dialog_option_take_photo">Take photo</string>
+    <string name="sh_image_picker_image_edit_dialog_option_choose_picture">Choose image</string>
+    <string name="sh_image_picker_image_edit_dialog_option_remove">Remove</string>
+
+    <string name="sh_image_picker_take_photo_processing_error">Error occurred while processing image</string>
+    <string name="sh_image_picker_take_photo_loading_error">Error occurred while loading image</string>
+
+    <string name="sh_image_picker_storage_not_available_message">Storage not\u00A0available</string>
+    <string name="sh_image_picker_unable_to_read_file_message">Error reading the\u00A0file</string>
+
+    <string name="sh_image_picker_crop_image_too_small">Image is too small</string>
+    <string name="sh_image_picker_crop_image_too_small_format">Size should be at least %1$d×%2$d</string>
+    <string name="sh_image_picker_crop_image_processing">Processing…</string>
+
+</resources>
