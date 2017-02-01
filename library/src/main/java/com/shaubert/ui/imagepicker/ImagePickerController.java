@@ -1,6 +1,5 @@
 package com.shaubert.ui.imagepicker;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
@@ -12,10 +11,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
+import com.shaubert.m.permission.MultiplePermissionsCallback;
 import com.shaubert.m.permission.PermissionsRequest;
-import com.shaubert.m.permission.SinglePermissionCallback;
 
 import java.io.File;
+import java.util.Collection;
 
 public class ImagePickerController extends LifecycleObjectsGroup {
 
@@ -83,21 +83,15 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         takePhotoPermissionRequest = new PermissionsRequest(
                 activity != null ? activity : fragment,
                 getBundleTag().hashCode() & 0x0000FFFF,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        takePhotoPermissionRequest.setSinglePermissionCallback(new SinglePermissionCallback() {
+                ManifestUtils.getPermissionsForCameraApp(getActivity()));
+        takePhotoPermissionRequest.setMultiplePermissionsCallback(new MultiplePermissionsCallback() {
             @Override
-            public void onPermissionGranted(PermissionsRequest request, String permission) {
+            public void onPermissionsResult(PermissionsRequest request, @NonNull Collection<String> granted, @NonNull Collection<String> denied) {
                 if (waitingForPermission) {
                     waitingForPermission = false;
-                    takePhoto();
-                }
-            }
-
-            @Override
-            public void onPermissionDenied(PermissionsRequest request, String permission) {
-                if (waitingForPermission) {
-                    waitingForPermission = false;
-                    errorPresenter.showStorageError(getActivity());
+                    if (denied.isEmpty()) {
+                        takePhoto();
+                    }
                 }
             }
         });
