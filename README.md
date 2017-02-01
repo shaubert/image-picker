@@ -8,7 +8,7 @@ Preview images, take photos from camera, pick images from documents, and crop th
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
     }
     dependencies {
-        compile 'com.shaubert.ui.imagepicker:library:0.1'
+        compile 'com.shaubert.ui.imagepicker:library:0.1.1'
     }
 
 ## References
@@ -45,12 +45,18 @@ To pick/crop image:
           loadingProgress, //optional
           errorView); //optional
           
-    //optional comperssion of picked image
-    imagePicker.setCompressionOptions(CompressionOptions.newBuilder()
-                    .maxFileSize(1024 * 200)
-                    .targetHeight(512)
-                    .targetWidth(512)
-                    .build());
+    //optional image comperession
+    imagePicker.setCompressionCallback(new ImagePickerController.CompressionCallback() {
+            @Nullable
+            @Override
+            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
+                return CompressionOptions.newBuilder()
+                        .maxFileSize(1024 * 200)
+                        .targetHeight(512)
+                        .targetWidth(512)
+                        .build();
+            }
+    });
                     
     //optional callback to enable cropping
     imagePicker.setCropCallback(new ImagePickerController.CropCallback() {
