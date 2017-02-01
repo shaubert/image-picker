@@ -3,6 +3,7 @@ package com.shaubert.imagepickersample;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Toast;
 import com.shaubert.lifecycle.objects.dispatchers.support.LifecycleDispatcherAppCompatActivity;
@@ -33,11 +34,17 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         imagePicker1.setDefaultImageUrl("http://sipi.usc.edu/database/preview/misc/4.2.05.png");
         viewHolder.getImage3().setOnClickListener(imagePicker1.createImageClickListener());
         imagePicker1.setupViews(new ImageViewTarget(viewHolder.getImage3()), viewHolder.getLoad3Button(), viewHolder.getImage3Progress(), viewHolder.getImage3Error());
-        imagePicker1.setCompressionOptions(CompressionOptions.newBuilder()
-                .maxFileSize(1024 * 200)
-                .targetHeight(512)
-                .targetWidth(512)
-                .build());
+        imagePicker1.setCompressionCallback(new ImagePickerController.CompressionCallback() {
+            @Nullable
+            @Override
+            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
+                return CompressionOptions.newBuilder()
+                        .maxFileSize(1024 * 200)
+                        .targetHeight(512)
+                        .targetWidth(512)
+                        .build();
+            }
+        });
         attachToLifecycle(imagePicker1);
 
         ImagePicker imagePicker2 = new ImagePicker(
@@ -76,9 +83,15 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                         .tag("picker-3")
                         .build(),
                 "picker-3");
-        imagePicker3.setCompressionOptions(CompressionOptions.newBuilder()
-                .maxFileSize(1024 * 200)
-                .build());
+        imagePicker3.setCompressionCallback(new ImagePickerController.CompressionCallback() {
+            @Nullable
+            @Override
+            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
+                return CompressionOptions.newBuilder()
+                        .maxFileSize(1024 * 200)
+                        .build();
+            }
+        });
         viewHolder.getLoad5Button().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -51,6 +51,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     private String publicDirectoryName;
     private String tag;
     private CropCallback cropCallback;
+    private CompressionCallback compressionCallback;
     private boolean privatePhotos;
 
     private State state;
@@ -115,6 +116,10 @@ public class ImagePickerController extends LifecycleObjectsGroup {
 
     public void setCallback(Callback callback) {
         this.callback = callback;
+    }
+
+    public void setCompressionCallback(CompressionCallback compressionCallback) {
+        this.compressionCallback = compressionCallback;
     }
 
     @Override
@@ -504,7 +509,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     private void processImage(File imageFile, boolean removeInputAfter) {
-        CompressionOptions compressionOptions = callback != null ? callback.getCompressionOptions(imageFile) : null;
+        CompressionOptions compressionOptions = compressionCallback != null ? compressionCallback.getCompressionOptions(imageFile) : null;
         if (compressionOptions != null
                 && compressionOptions.maxFileSize > 0
                 && imageFile.length() > compressionOptions.maxFileSize) {
@@ -603,7 +608,10 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         void onImageFileSet(@Nullable File imageFile);
         void onStateChanged(State state);
         ImageTarget getImageTarget();
-        CompressionOptions getCompressionOptions(@NonNull File imageFile);
+    }
+
+    public interface CompressionCallback {
+        @Nullable CompressionOptions getCompressionOptions(@NonNull File imageFile);
     }
 
     public interface CropCallback {

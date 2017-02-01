@@ -21,7 +21,6 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private String imageUrl;
     private String defaultImageUrl;
     private String currentUrl;
-    private CompressionOptions compressionOptions;
     private String tag;
 
     public ImagePicker(ImagePickerController controller, @NonNull String tag) {
@@ -48,11 +47,6 @@ public class ImagePicker extends LifecycleObjectsGroup {
             @Override
             public ImageTarget getImageTarget() {
                 return ImagePicker.this.getImageTarget();
-            }
-
-            @Override
-            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
-                return ImagePicker.this.getCompressionOptions();
             }
         };
     }
@@ -311,12 +305,8 @@ public class ImagePicker extends LifecycleObjectsGroup {
         controller.setCropCallback(cropCallback);
     }
 
-    public void setCompressionOptions(CompressionOptions compressionOptions) {
-        this.compressionOptions = compressionOptions;
-    }
-
-    public CompressionOptions getCompressionOptions() {
-        return compressionOptions;
+    public void setCompressionCallback(ImagePickerController.CompressionCallback compressionCallback) {
+        controller.setCompressionCallback(compressionCallback);
     }
 
     public File getImageFile() {
