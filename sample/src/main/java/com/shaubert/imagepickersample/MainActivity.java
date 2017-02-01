@@ -1,4 +1,4 @@
-package com.shaubert.remoteimageviewsample;
+package com.shaubert.imagepickersample;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;

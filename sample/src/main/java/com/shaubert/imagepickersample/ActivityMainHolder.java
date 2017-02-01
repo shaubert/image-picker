@@ -1,4 +1,4 @@
-package com.shaubert.remoteimageviewsample;
+package com.shaubert.imagepickersample;
 
 import android.app.Activity;
 import android.view.View;
