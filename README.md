@@ -17,17 +17,27 @@ Preview images, take photos from camera, pick images from documents, and crop th
 
 ## How-to
 
-Setup `ImagePicker`:
+Setup `ImagePickerConfig`:
     
-    new ImagePicker.Setup()
-        .imageLoader()
+    ImagePickerConfig.setup()
+        .imageLoader() //You can use GlideImageLoader or implement simple interface to load images with other library
         .openImageActivityClass() //[Optional] Activity class to show fullscreen image
-        .cropImageActivityClass() //[Optional] Activity class to show fullscreen image
+        .cropImageActivityClass() //[Optional] Activity class to crop image
         .apply();
             
 To pick/crop image:
 
-    ImagePicker imagePicker = new ImagePicker(this, "picker");    
+    ImagePicker imagePicker = new ImagePicker(
+                ImagePickerController.builder()
+                        .activity(this)
+                        .fragment(this) //or fragment
+                        .editActionsPresenter(new EditActionsDialogPresenter(this, getSupportFragmentManager(), "picker-dialog"))
+                        .privatePhotos(true) //to hide taken photos
+                        .compression(new DefaultCompression()) //optional
+                        .errorPresenter(new ToastErrorPresenter()) //optional
+                        .tag("picker-controller")
+                        .build(),
+                "picker");
     imagePicker.setDefaultImageUrl("http://sipi.usc.edu/database/preview/misc/4.2.05.png", true);
     
     imagePicker.setupViews(remoteImageView, //required
@@ -40,7 +50,6 @@ To pick/crop image:
                     .maxFileSize(1024 * 200)
                     .targetHeight(512)
                     .targetWidth(512)
-                    .targetScaleType(ViewScaleType.CROP)
                     .build());
                     
     //optional callback to enable cropping
@@ -60,9 +69,6 @@ To pick/crop image:
                     .aspectY(1); //image frame aspect ratio
         }
     });
-    
-    //to hide taken photos from gallery 
-    imagePicker.setPrivatePhotos(true);
-    
+        
     //you need to attach it to `LifecycleDelegate` or manualy call all `distach*` methods of `LifecycleDispatcher`.
     attachToLifecycle(imagePicker);
