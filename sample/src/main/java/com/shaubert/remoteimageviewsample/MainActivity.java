@@ -7,14 +7,11 @@ import android.view.View;
 import android.widget.Toast;
 import com.shaubert.lifecycle.objects.dispatchers.support.LifecycleDispatcherAppCompatActivity;
 import com.shaubert.ui.imagepicker.*;
-import com.shaubert.ui.imagepicker.nostra.ViewScaleType;
 
 import java.io.File;
 
 
 public class MainActivity extends LifecycleDispatcherAppCompatActivity {
-
-    private ActivityMainHolder viewHolder;
 
     @Override
     @SuppressWarnings("deprecation")
@@ -23,9 +20,16 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        viewHolder = new ActivityMainHolder(this);
+        ActivityMainHolder viewHolder = new ActivityMainHolder(this);
 
-        ImagePicker imagePicker1 = new ImagePicker(this, "picker");
+        ImagePicker imagePicker1 = new ImagePicker(
+                ImagePickerController.builder()
+                        .activity(this)
+                        .editActionsPresenter(new EditActionsDialogPresenter(this, getSupportFragmentManager(), "picker-1"))
+                        .privatePhotos(false)
+                        .tag("picker-1")
+                        .build(),
+                "picker");
         imagePicker1.setDefaultImageUrl("http://sipi.usc.edu/database/preview/misc/4.2.05.png");
         viewHolder.getImage3().setOnClickListener(imagePicker1.createImageClickListener());
         imagePicker1.setupViews(new ImageViewTarget(viewHolder.getImage3()), viewHolder.getLoad3Button(), viewHolder.getImage3Progress(), viewHolder.getImage3Error());
@@ -33,11 +37,17 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                 .maxFileSize(1024 * 200)
                 .targetHeight(512)
                 .targetWidth(512)
-                .targetScaleType(ViewScaleType.CROP)
                 .build());
         attachToLifecycle(imagePicker1);
 
-        ImagePicker imagePicker2 = new ImagePicker(this, "cropper");
+        ImagePicker imagePicker2 = new ImagePicker(
+                ImagePickerController.builder()
+                        .activity(this)
+                        .editActionsPresenter(new EditActionsDialogPresenter(this, getSupportFragmentManager(), "picker-2"))
+                        .privatePhotos(true)
+                        .tag("picker-2")
+                        .build(),
+                "cropper");
         viewHolder.getImage4().setOnClickListener(imagePicker2.createImageClickListener());
         imagePicker2.setupViews(new ImageViewTarget(viewHolder.getImage4()), viewHolder.getLoad4Button(), null, null);
         imagePicker2.setCropCallback(new ImagePickerController.CropCallback() {
@@ -56,13 +66,18 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                         .aspectY(2);
             }
         });
-        imagePicker2.setPrivatePhotos(true);
         attachToLifecycle(imagePicker2);
 
-        final ImagePicker imagePicker3 = new ImagePicker(this, "picker-3");
+        final ImagePicker imagePicker3 = new ImagePicker(
+                ImagePickerController.builder()
+                        .activity(this)
+                        .editActionsPresenter(new EditActionsDialogPresenter(this, getSupportFragmentManager(), "picker-3"))
+                        .privatePhotos(false)
+                        .tag("picker-3")
+                        .build(),
+                "picker-3");
         imagePicker3.setCompressionOptions(CompressionOptions.newBuilder()
                 .maxFileSize(1024 * 200)
-                .targetScaleType(ViewScaleType.CROP)
                 .build());
         viewHolder.getLoad5Button().setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,10 +105,16 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         attachToLifecycle(imagePicker3);
 
 
-        ImagePicker imagePicker4 = new ImagePicker(this, "picker-4");
+        ImagePicker imagePicker4 = new ImagePicker(
+                ImagePickerController.builder()
+                        .activity(this)
+                        .editActionsPresenter(new EditActionsDialogPresenter(this, getSupportFragmentManager(), "picker-4"))
+                        .privatePhotos(true)
+                        .tag("picker-4")
+                        .build(),
+                "picker-4");
         viewHolder.getImage6().setOnClickListener(imagePicker4.createImageClickListener());
         imagePicker4.setupViews(new ImageViewTarget(viewHolder.getImage6()), viewHolder.getLoad6Button(), null, null);
-        imagePicker4.setPrivatePhotos(true);
         imagePicker4.setImageUrl("http://sipi.usc.edu/database/preview/misc/4.2.06.png");
         attachToLifecycle(imagePicker4);
     }

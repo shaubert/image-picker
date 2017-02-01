@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import java.util.List;
 public class ImageViewActivity extends Activity {
 
     public static final String IMAGE_URL_EXTRA = "_image_url_extra";
+    public static final String TRANSITION_NAME_EXTRA = "_transition_name_extra";
     public static final ImageView.ScaleType SCALE_TYPE = ImageView.ScaleType.FIT_CENTER;
 
     private ImageView photoView;
@@ -40,6 +42,7 @@ public class ImageViewActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         String imageUrl = getIntent().getStringExtra(IMAGE_URL_EXTRA);
+        String transitionName = getIntent().getStringExtra(TRANSITION_NAME_EXTRA);
 
         photoView = new ImageView(this);
         photoView.setScaleType(SCALE_TYPE);
@@ -47,6 +50,7 @@ public class ImageViewActivity extends Activity {
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         getWindow().getDecorView().setBackground(new ColorDrawable(Color.BLACK));
 
+        ActivityCompat.postponeEnterTransition(this);
         ImagePickerConfig.getImageLoader().loadImage(imageUrl, new ImageViewTarget(photoView), new ImageLoader.LoadingCallback<Drawable>() {
             @Override
             public void onLoadingStarted(String imageUri) {
@@ -56,16 +60,14 @@ public class ImageViewActivity extends Activity {
             @Override
             public void onLoadingComplete(String imageUri, Drawable loadedImage) {
                 loading = false;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    startPostponedEnterTransition();
-                }
+                ActivityCompat.startPostponedEnterTransition(ImageViewActivity.this);
                 connectPhotoAttacher();
             }
 
             @Override
             public void onLoadingFailed(String imageUri, Exception ex) {
                 loading = false;
-                ImagePickerController.showLoadingError(ImageViewActivity.this);
+                new ToastErrorPresenter().showLoadingError(ImageViewActivity.this);
                 finish();
             }
         });
@@ -73,7 +75,7 @@ public class ImageViewActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(Color.BLACK);
 
-            photoView.setTransitionName(imageUrl);
+            photoView.setTransitionName(transitionName);
 
             setEnterSharedElementCallback(new SharedElementCallback() {
                 @Override
@@ -155,12 +157,18 @@ public class ImageViewActivity extends Activity {
 
     @SuppressLint("NewApi")
     public static void start(Activity activity, View sharedImageView, String imageUrl) {
-        String transitionName = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? sharedImageView.getTransitionName() : null;
-        ActivityOptionsCompat activityOptions =
-                ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedImageView, transitionName);
         Intent intent = new Intent(activity, ImagePickerConfig.getOpenImageActivityClass());
         intent.putExtra(ImageViewActivity.IMAGE_URL_EXTRA, imageUrl);
-        ActivityCompat.startActivity(activity, intent, activityOptions.toBundle());
+
+        String transitionName = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? sharedImageView.getTransitionName() : null;
+        Bundle activityOptions = null;
+        if (!TextUtils.isEmpty(transitionName)) {
+            intent.putExtra(ImageViewActivity.TRANSITION_NAME_EXTRA, transitionName);
+            activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedImageView, transitionName)
+                            .toBundle();
+        }
+
+        ActivityCompat.startActivity(activity, intent, activityOptions);
     }
 
 }

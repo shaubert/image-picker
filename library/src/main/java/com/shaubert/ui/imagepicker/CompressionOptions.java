@@ -1,18 +1,14 @@
 package com.shaubert.ui.imagepicker;
 
-import com.shaubert.ui.imagepicker.nostra.ViewScaleType;
-
 public class CompressionOptions {
     public final int maxFileSize;
     public final int targetWidth;
     public final int targetHeight;
-    public final ViewScaleType targetScaleType;
 
     CompressionOptions(Builder builder) {
         maxFileSize = builder.maxFileSize;
         targetWidth = builder.targetWidth;
         targetHeight = builder.targetHeight;
-        targetScaleType = builder.targetScaleType;
     }
 
     public static Builder newBuilder() {
@@ -23,7 +19,6 @@ public class CompressionOptions {
         private int maxFileSize = ImagePickerController.DEFAULT_MAX_FILE_SIZE;
         private int targetWidth = ImagePickerController.DEFAULT_TARGET_IMAGE_WIDTH;
         private int targetHeight = ImagePickerController.DEFAULT_TARGET_IMAGE_HEIGHT;
-        private ViewScaleType targetScaleType = ImagePickerController.DEFAULT_TARGET_SCALE_TYPE;
 
         private Builder() {
         }
@@ -40,11 +35,6 @@ public class CompressionOptions {
 
         public Builder targetHeight(int targetHeight) {
             this.targetHeight = targetHeight;
-            return this;
-        }
-
-        public Builder targetScaleType(ViewScaleType targetScaleType) {
-            this.targetScaleType = targetScaleType;
             return this;
         }
 

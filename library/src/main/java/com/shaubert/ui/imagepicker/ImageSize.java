@@ -1,9 +1,9 @@
-package com.shaubert.ui.imagepicker.nostra;
+package com.shaubert.ui.imagepicker;
 
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  */
-public class ImageSize {
+class ImageSize {
 
 	private static final int TO_STRING_MAX_LENGHT = 9; // "9999x9999".length()
 	private static final String SEPARATOR = "x";

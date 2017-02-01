@@ -21,7 +21,8 @@
                 android:layout_width="192dp"
                 android:layout_height="192dp"
                 android:layout_marginTop="24dp"
-                android:layout_gravity="center"/>
+                android:layout_gravity="center"
+                android:transitionName="image3"/>
 
             <ProgressBar
                 android:id="@+id/progress_image_3"
@@ -52,7 +53,8 @@
             android:id="@+id/image_4"
             android:layout_width="192dp"
             android:layout_height="192dp"
-            android:layout_marginTop="24dp"/>
+            android:layout_marginTop="24dp"
+            android:transitionName="image4"/>
 
         <Button
             android:id="@+id/load_4_button"
@@ -75,7 +77,8 @@
             android:layout_width="192dp"
             android:layout_height="192dp"
             android:layout_marginTop="24dp"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop"
+            android:transitionName="image6"/>
 
         <Button
             android:id="@+id/load_6_button"

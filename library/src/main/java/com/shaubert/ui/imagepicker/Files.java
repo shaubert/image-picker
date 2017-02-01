@@ -9,16 +9,101 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 class Files {
 
     public static final String TAG = Files.class.getSimpleName();
+
+    private static final SimpleDateFormat PUBLIC_FILE_NAME_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
+    private static final Pattern FILE_NAME_PATTERN = Pattern.compile("[^\\p{L}0-9_\\.]");
+
+    //Bound to xml/path.xml
+    private static final String IMAGE_PICKER_TEMP_DIR_NAME = "image-picker-temp";
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static File generateTempFileOrShowError(Context context, ErrorPresenter errorPresenter) {
+        File file = generateTempFile(context);
+        if (file == null) {
+            errorPresenter.showStorageError(context);
+        }
+        return file;
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static File generatePublicTempFileOrShowError(Context context, String dirName, ErrorPresenter errorPresenter) {
+        File file = generatePublicTempFile(dirName);
+        if (file == null) {
+            errorPresenter.showStorageError(context);
+        }
+        return file;
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static File generateTempFile(Context context) {
+        File tempRoot = getTempRoot(context);
+        if (tempRoot != null) {
+            return new File(tempRoot, UUID.randomUUID().toString());
+        } else {
+            return null;
+        }
+    }
+
+    public static File getTempRoot(Context context) {
+        File photosDir = StorageUtils.getCacheDirectory(context);
+        if (photosDir != null) {
+            File innerDir = new File(photosDir, IMAGE_PICKER_TEMP_DIR_NAME);
+            if (innerDir.exists() || innerDir.mkdirs()) {
+                return innerDir;
+            }
+        }
+        return null;
+    }
+
+    public static boolean isTempFile(Context context, File file) {
+        File tempRoot = getTempRoot(context);
+        if (file == null || tempRoot == null) return false;
+        return file.getAbsolutePath().contains(tempRoot.getAbsolutePath());
+    }
+
+    public static boolean isPublicFile(File file) {
+        File photosDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        if (photosDir == null || file == null) return false;
+        return file.getAbsolutePath().contains(photosDir.getAbsolutePath());
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    public static File generatePublicTempFile(String dirName) {
+        File externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        if (externalStorage == null) return null;
+
+        File appPhotosDir = TextUtils.isEmpty(dirName) ? externalStorage : new File(externalStorage, dirName);
+        if (!appPhotosDir.exists() && !appPhotosDir.mkdirs()) {
+            return null;
+        }
+
+        String filename = "IMG_" + PUBLIC_FILE_NAME_FORMAT.format(new Date());
+        File resultFile;
+        int i = 1;
+        while (true) {
+            resultFile = new File(appPhotosDir, filename + (i == 1 ? "" : ("_" + i)) + ".jpg");
+            if (!resultFile.exists()) break;
+            i++;
+        }
+
+        return resultFile;
+    }
 
     public static boolean copy(File from, File to) {
         FileInputStream inputStream = null;
@@ -61,7 +146,7 @@ class Files {
      * other file-based ContentProviders.
      *
      * @param context The context.
-     * @param uri The Uri to query.
+     * @param uri     The Uri to query.
      * @author paulburke
      */
     public static String getPath(final Context context, final Uri uri) {
@@ -116,7 +201,7 @@ class Files {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
+                final String[] selectionArgs = new String[]{
                         split[1]
                 };
 
@@ -139,14 +224,14 @@ class Files {
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
-     * @param context The context.
-     * @param uri The Uri to query.
-     * @param selection (Optional) Filter used in the query.
+     * @param context       The context.
+     * @param uri           The Uri to query.
+     * @param selection     (Optional) Filter used in the query.
      * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
     private static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
+                                        String[] selectionArgs) {
 
         Cursor cursor = null;
         final String column = "_data";

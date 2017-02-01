@@ -49,7 +49,7 @@ public class CropImageActivity extends FragmentActivity {
             if (cropResult) {
                 finishWithOk();
             } else {
-                ImagePickerController.showStorageError(CropImageActivity.this);
+                new ToastErrorPresenter().showStorageError(CropImageActivity.this);
             }
             cropResult = null;
         }
@@ -77,7 +77,7 @@ public class CropImageActivity extends FragmentActivity {
         if (cropOptions == null
                 || cropOptions.getInUri() == null
                 || cropOptions.getOutUri() == null) {
-            ImagePickerController.showLoadingError(this);
+            new ToastErrorPresenter().showLoadingError(CropImageActivity.this);
             return;
         }
 
@@ -134,7 +134,7 @@ public class CropImageActivity extends FragmentActivity {
 
             @Override
             public void onLoadingFailed(String imageUri, Exception ex) {
-                ImagePickerController.showLoadingError(CropImageActivity.this);
+                new ToastErrorPresenter().showLoadingError(CropImageActivity.this);
                 finishWithCancel();
             }
         });

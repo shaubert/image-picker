@@ -4,12 +4,9 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.view.View;
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
-import com.shaubert.ui.imagepicker.nostra.Scheme;
 
 import java.io.File;
 
@@ -27,16 +24,13 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private CompressionOptions compressionOptions;
     private String tag;
 
-    public ImagePicker(@NonNull Fragment fragment, @NonNull String tag) {
+    public ImagePicker(ImagePickerController controller, @NonNull String tag) {
         this.tag = tag;
-        controller = new ImagePickerController(fragment, createControllerCallback(), tag);
-        attachToLifecycle(controller);
-    }
-
-    public ImagePicker(@NonNull FragmentActivity fragmentActivity, @NonNull String tag) {
-        this.tag = tag;
-        controller = new ImagePickerController(fragmentActivity, createControllerCallback(), tag);
-        attachToLifecycle(controller);
+        this.controller = controller;
+        controller.setCallback(createControllerCallback());
+        if (!controller.isAttached()) {
+            attachToLifecycle(controller);
+        }
     }
 
     private ImagePickerController.Callback createControllerCallback() {
@@ -260,6 +254,8 @@ public class ImagePicker extends LifecycleObjectsGroup {
         if (imageTarget != null) {
             if (TextUtils.equals(currentUrl, imageUrl)) {
                 controller.onLoadingComplete(imageUrl);
+            } else if (TextUtils.isEmpty(imageUrl)) {
+                imageTarget.setImage(null);
             } else {
                 ImagePickerConfig.getImageLoader().loadImage(imageUrl, imageTarget, new ImageLoader.LoadingCallback<Drawable>() {
                     @Override
@@ -305,10 +301,6 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
     protected ImagePickerController getController() {
         return controller;
-    }
-
-    public void setPrivatePhotos(boolean privatePhotos) {
-        controller.setPrivatePhotos(privatePhotos);
     }
 
     public boolean isPrivatePhotos() {

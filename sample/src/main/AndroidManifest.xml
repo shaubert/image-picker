@@ -22,8 +22,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.shaubert.ui.imagepicker.ImageViewActivity"/>
-        <activity android:name="com.shaubert.ui.imagepicker.CropImageActivity"/>
     </application>
 
 </manifest>

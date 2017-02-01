@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <files-path name="image-picker-files" path="image-picker-temp/" />
+    <cache-path name="image-picker-internal" path="image-picker-temp/" />
+    <external-cache-path name="image-picker-external" path="image-picker-temp/" />
+    <external-path name="image-picker-public" path="Pictures/" />
+</paths>

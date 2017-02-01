@@ -1,11 +1,11 @@
-package com.shaubert.ui.imagepicker.nostra;
+package com.shaubert.ui.imagepicker;
 
 import java.util.Locale;
 
 /**
  * @author Sergey Tarasevich (nostra13[at]gmail[dot]com)
  */
-public enum Scheme {
+enum Scheme {
     HTTP("http"), HTTPS("https"), FILE("file"), CONTENT("content"), ASSETS("assets"), DRAWABLE("drawable"), UNKNOWN("");
 
     private String scheme;
