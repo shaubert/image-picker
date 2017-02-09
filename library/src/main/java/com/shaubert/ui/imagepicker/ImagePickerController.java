@@ -1,5 +1,6 @@
 package com.shaubert.ui.imagepicker;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
@@ -13,6 +14,7 @@ import android.text.TextUtils;
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
 import com.shaubert.m.permission.MultiplePermissionsCallback;
 import com.shaubert.m.permission.PermissionsRequest;
+import com.shaubert.m.permission.SinglePermissionCallback;
 
 import java.io.File;
 import java.util.Collection;
@@ -58,8 +60,9 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     private boolean readonly;
 
     private boolean waitingForActivityResult;
-    private boolean waitingForPermission;
 
+    private boolean waitingForPermission;
+    private PermissionsRequest pickPhotoPermissionRequest;
     private PermissionsRequest takePhotoPermissionRequest;
 
     public static Builder builder() {
@@ -96,6 +99,26 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             }
         });
         attachToLifecycle(takePhotoPermissionRequest);
+
+        pickPhotoPermissionRequest = new PermissionsRequest(
+                activity != null ? activity : fragment,
+                (getBundleTag().hashCode() + 1) & 0x0000FFFF,
+                Manifest.permission.READ_EXTERNAL_STORAGE);
+        pickPhotoPermissionRequest.setSinglePermissionCallback(new SinglePermissionCallback() {
+            @Override
+            public void onPermissionGranted(PermissionsRequest request, String permission) {
+                if (waitingForPermission) {
+                    waitingForPermission = false;
+                    pickPicture();
+                }
+            }
+
+            @Override
+            public void onPermissionDenied(PermissionsRequest request, String permission) {
+
+            }
+        });
+        attachToLifecycle(pickPhotoPermissionRequest);
 
         editActionsPresenter.bindTo(this);
     }
@@ -339,6 +362,11 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     public void onPickPictureClicked() {
+        waitingForPermission = true;
+        pickPhotoPermissionRequest.request();
+    }
+
+    private void pickPicture() {
         startActivityForResult(Intents.getPickImageIntent(getActivity()), REQUEST_PICK);
     }
 
