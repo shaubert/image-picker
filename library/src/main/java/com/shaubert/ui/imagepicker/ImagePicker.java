@@ -152,11 +152,12 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
     private void setImageTarget(final ImageTarget imageTarget) {
         this.imageTarget = imageTarget;
+        currentUrl = null;
         if (imageTarget == null) {
             return;
         }
 
-        setDefaultImage();
+        onImageFileSet(getImageFile());
         onStateChanged(controller.getState());
     }
 
@@ -292,6 +293,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
     public void clear() {
         imageUrl = null;
+        currentUrl = null;
         controller.clear();
         setDefaultImage();
     }
