@@ -31,7 +31,7 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                         .tag("picker-1")
                         .build(),
                 "picker");
-        imagePicker1.setDefaultImageUrl("http://sipi.usc.edu/database/preview/misc/4.2.05.png");
+        imagePicker1.setDefaultImageDrawable(getDrawable(R.mipmap.ic_launcher));
         viewHolder.getImage3().setOnClickListener(imagePicker1.createImageClickListener());
         imagePicker1.setupViews(new ImageViewTarget(viewHolder.getImage3()), viewHolder.getLoad3Button(), viewHolder.getImage3Progress(), viewHolder.getImage3Error());
         imagePicker1.setCompressionCallback(new ImagePickerController.CompressionCallback() {

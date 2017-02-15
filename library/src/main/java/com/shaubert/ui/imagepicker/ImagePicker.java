@@ -20,6 +20,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private ImagePickerController controller;
     private String imageUrl;
     private String defaultImageUrl;
+    private Drawable defaultImageDrawable;
     private String currentUrl;
     private String tag;
 
@@ -155,10 +156,18 @@ public class ImagePicker extends LifecycleObjectsGroup {
             return;
         }
 
-        if (!TextUtils.isEmpty(defaultImageUrl)) {
+        setDefaultImage();
+        onStateChanged(controller.getState());
+    }
+
+    private void setDefaultImage() {
+        if (imageTarget == null) return;
+
+        if (defaultImageDrawable != null) {
+            imageTarget.setImage(defaultImageDrawable);
+        } else if (!TextUtils.isEmpty(defaultImageUrl)) {
             loadImage(defaultImageUrl);
         }
-        onStateChanged(controller.getState());
     }
 
     public View.OnClickListener createImageClickListener() {
@@ -184,6 +193,13 @@ public class ImagePicker extends LifecycleObjectsGroup {
         };
     }
 
+    public void setDefaultImageDrawable(Drawable defaultImageDrawable) {
+        this.defaultImageDrawable = defaultImageDrawable;
+        if (!hasImage() && imageTarget != null) {
+            imageTarget.setImage(defaultImageDrawable);
+        }
+    }
+
     public void setDefaultImageUrl(String imageUrl) {
         defaultImageUrl = imageUrl;
         if (!hasImage()) {
@@ -196,7 +212,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
         if (imageUrl == null
                 || imageUrl.equals(defaultImageUrl)) {
             this.imageUrl = null;
-            loadImage(defaultImageUrl);
+            setDefaultImage();
         } else {
             this.imageUrl = imageUrl;
             loadImage(imageUrl);
@@ -277,9 +293,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
     public void clear() {
         imageUrl = null;
         controller.clear();
-        if (defaultImageUrl != null) {
-            loadImage(defaultImageUrl);
-        }
+        setDefaultImage();
     }
 
     @Override
@@ -322,11 +336,15 @@ public class ImagePicker extends LifecycleObjectsGroup {
     }
 
     public boolean currentImageIsDefault() {
-        return !hasImage() && !TextUtils.isEmpty(defaultImageUrl);
+        return !hasImage() && (!TextUtils.isEmpty(defaultImageUrl) || defaultImageDrawable != null);
     }
 
     public String getDefaultImageUrl() {
         return defaultImageUrl;
+    }
+
+    public Drawable getDefaultImageDrawable() {
+        return defaultImageDrawable;
     }
 
     public boolean hasImage() {
