@@ -24,6 +24,8 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private String currentUrl;
     private String tag;
 
+    private boolean stopped = true;
+
     public ImagePicker(ImagePickerController controller, @NonNull String tag) {
         this.tag = tag;
         this.controller = controller;
@@ -239,11 +241,12 @@ public class ImagePicker extends LifecycleObjectsGroup {
             ImagePickerConfig.getImageLoader().save(imageUrl, new ImageLoader.SaveCallback() {
                 @Override
                 public void onLoadingStarted(String imageUri) {
-
                 }
 
                 @Override
                 public void onSaved(String imageUri, File file) {
+                    if (stopped) return;
+
                     if (TextUtils.equals(ImagePicker.this.imageUrl, imageUri)) {
                         setImageFile(file);
                     }
@@ -251,7 +254,6 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
                 @Override
                 public void onLoadingFailed(String imageUri, Exception ex) {
-
                 }
             });
         }
@@ -271,17 +273,23 @@ public class ImagePicker extends LifecycleObjectsGroup {
                 ImagePickerConfig.getImageLoader().loadImage(imageUrl, imageTarget, new ImageLoader.LoadingCallback<Drawable>() {
                     @Override
                     public void onLoadingStarted(String imageUri) {
+                        if (stopped) return;
+
                         controller.onLoadingStarted(imageUri);
                     }
 
                     @Override
                     public void onLoadingComplete(String imageUri, Drawable loadedImage) {
+                        if (stopped) return;
+
                         ImagePicker.this.currentUrl = imageUri;
                         controller.onLoadingComplete(imageUri);
                     }
 
                     @Override
                     public void onLoadingFailed(String imageUri, Exception ex) {
+                        if (stopped) return;
+
                         controller.onLoadingFailed(imageUri);
                     }
                 });
@@ -302,6 +310,16 @@ public class ImagePicker extends LifecycleObjectsGroup {
     protected void onPause(boolean isFinishing) {
         super.onPause(isFinishing);
         if (isFinishing) controller.removeTempFiles();
+    }
+
+    @Override
+    protected void onStop(boolean isFinishing) {
+        stopped = true;
+    }
+
+    @Override
+    protected void onStart() {
+        stopped = false;
     }
 
     @Override
