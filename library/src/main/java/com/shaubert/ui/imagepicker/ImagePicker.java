@@ -217,7 +217,9 @@ public class ImagePicker extends LifecycleObjectsGroup {
             this.imageUrl = null;
             setDefaultImage();
         } else {
-            this.imageUrl = imageUrl;
+            if (controller.hasUserImage()) {
+                this.imageUrl = imageUrl;
+            }
             loadImage(imageUrl);
         }
     }
