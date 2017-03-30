@@ -33,6 +33,7 @@ public class CropImageActivity extends FragmentActivity {
     private CropOptions cropOptions;
     private Handler handler = new Handler();
     private ProgressDialogManager progressDialog;
+    private boolean imageSet;
 
     private static AsyncTask<Void, Void, Boolean> cropTask;
     private static Boolean cropResult;
@@ -88,7 +89,7 @@ public class CropImageActivity extends FragmentActivity {
         doneCancelView.setCallback(new DoneCancelView.Callback() {
             @Override
             public boolean onDone() {
-                saveResultAndFinish();
+                saveResult();
                 return false;
             }
 
@@ -119,6 +120,8 @@ public class CropImageActivity extends FragmentActivity {
             @Override
             public void onLoadingComplete(String imageUri, Bitmap loadedImage) {
                 cropImageView.setImageBitmap(loadedImage);
+                imageSet = true;
+
                 final int aspectX = cropOptions.getAspectX();
                 final int aspectY = cropOptions.getAspectY();
                 if (aspectX > 0 && aspectY > 0) {
@@ -169,7 +172,9 @@ public class CropImageActivity extends FragmentActivity {
         finish();
     }
 
-    public void saveResultAndFinish() {
+    public void saveResult() {
+        if (!imageSet) return;
+
         if (validateMinSizes()) {
             Bitmap image = cropImageView.getCroppedImage();
             int maxWidth = cropOptions.getMaxWidth();
@@ -240,6 +245,8 @@ public class CropImageActivity extends FragmentActivity {
     }
 
     private boolean validateMinSizes() {
+        if (!imageSet) return false;
+
         RectF cropRect = cropImageView.getActualCropRect();
         int minWidth = cropOptions.getMinWidth();
         int minHeight = cropOptions.getMinHeight();
