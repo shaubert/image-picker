@@ -168,7 +168,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
         if (defaultImageDrawable != null) {
             imageTarget.setImage(defaultImageDrawable);
-        } else if (!TextUtils.isEmpty(defaultImageUrl)) {
+        } else {
             loadImage(defaultImageUrl);
         }
     }
