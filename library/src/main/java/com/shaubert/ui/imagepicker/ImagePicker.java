@@ -38,8 +38,8 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private ImagePickerController.Callback createControllerCallback() {
         return new ImagePickerController.Callback() {
             @Override
-            public void onImageFileSet(@Nullable File imageFile) {
-                ImagePicker.this.onImageFileSet(imageFile);
+            public void onImageFileSet(@Nullable File imageFile, boolean userPickedImage) {
+                ImagePicker.this.onImageFileSet(imageFile, userPickedImage);
             }
 
             @Override
@@ -159,7 +159,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
             return;
         }
 
-        onImageFileSet(getImageFile());
+        onImageFileSet(getImageFile(), hasUserImage());
         onStateChanged(controller.getState());
     }
 
@@ -210,14 +210,14 @@ public class ImagePicker extends LifecycleObjectsGroup {
         }
     }
 
-    private void onImageFileSet(File imageFile) {
+    private void onImageFileSet(File imageFile, boolean userPickedImage) {
         String imageUrl = imageFile != null ? Scheme.FILE.wrap(imageFile.getPath()) : null;
         if (imageUrl == null
                 || imageUrl.equals(defaultImageUrl)) {
             this.imageUrl = null;
             setDefaultImage();
         } else {
-            if (controller.hasUserImage()) {
+            if (userPickedImage) {
                 this.imageUrl = imageUrl;
             }
             loadImage(imageUrl);

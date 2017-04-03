@@ -172,11 +172,11 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         if (!TextUtils.isEmpty(imagePath)) {
             imageFile = new File(imagePath);
             userPickedImage = stateBundle.getBoolean(USER_PICKED_IMAGE, false);
-            if (callback != null) callback.onImageFileSet(imageFile);
+            if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
         } else {
             imageFile = null;
             userPickedImage = false;
-            if (callback != null) callback.onImageFileSet(null);
+            if (callback != null) callback.onImageFileSet(null, userPickedImage);
         }
 
         setState(state);
@@ -269,7 +269,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             imageFile = null;
             userPickedImage = false;
             setState(State.EMPTY);
-            if (callback != null) callback.onImageFileSet(null);
+            if (callback != null) callback.onImageFileSet(null, userPickedImage);
         }
     }
 
@@ -295,7 +295,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             setState(State.EMPTY);
         } else {
             setState(State.LOADING);
-            if (callback != null) callback.onImageFileSet(imageFile);
+            if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
         }
     }
 
@@ -382,7 +382,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     public void retryLoading() {
         if (state == State.ERROR && imageFile != null) {
             setState(State.LOADING);
-            if (callback != null) callback.onImageFileSet(imageFile);
+            if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
         }
     }
 
@@ -400,7 +400,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             imageFile = null;
             userPickedImage = false;
             setState(State.EMPTY);
-            if (callback != null) callback.onImageFileSet(null);
+            if (callback != null) callback.onImageFileSet(null, userPickedImage);
         }
     }
 
@@ -617,7 +617,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         }
         this.imageFile = imageFile;
         userPickedImage = true;
-        if (callback != null) callback.onImageFileSet(imageFile);
+        if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
     }
 
     public interface ImageListener {
@@ -627,7 +627,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     public interface Callback {
-        void onImageFileSet(@Nullable File imageFile);
+        void onImageFileSet(@Nullable File imageFile, boolean userPickedImage);
         void onStateChanged(State state);
         ImageTarget getImageTarget();
     }
