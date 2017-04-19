@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
 
 import java.io.File;
 import java.util.List;
@@ -54,7 +53,7 @@ class Intents {
                 : Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                 .setFlags(flags);
-        Uri contentUri = FileProvider.getUriForFile(context, fileProviderAuthority, output);
+        Uri contentUri = SafeFileProvider.getUriForFile(context, fileProviderAuthority, output);
         List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         for (ResolveInfo resolveInfo : resInfoList) {
             String packageName = resolveInfo.activityInfo.packageName;
