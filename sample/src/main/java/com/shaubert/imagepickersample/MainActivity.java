@@ -1,6 +1,5 @@
 package com.shaubert.imagepickersample;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,7 +15,6 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
 
     @Override
     @SuppressWarnings("deprecation")
-    @SuppressLint("NewApi")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -31,7 +29,7 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                         .tag("picker-1")
                         .build(),
                 "picker");
-        imagePicker1.setDefaultImageDrawable(getDrawable(R.mipmap.ic_launcher));
+        imagePicker1.setDefaultImageDrawable(getResources().getDrawable(R.mipmap.ic_launcher));
         viewHolder.getImage3().setOnClickListener(imagePicker1.createImageClickListener());
         imagePicker1.setupViews(new ImageViewTarget(viewHolder.getImage3()), viewHolder.getLoad3Button(), viewHolder.getImage3Progress(), viewHolder.getImage3Error());
         imagePicker1.setCompressionCallback(new ImagePickerController.CompressionCallback() {
@@ -65,12 +63,12 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
 
             @Override
             public void setupCropOptions(@NonNull File imageFile, @NonNull CropOptions.Builder builder) {
-                builder.minHeight(200)
-                        .minWidth(200)
+                builder.minHeight(50)
+                        .minWidth(50)
                         .maxHeight(400)
                         .maxWidth(400)
                         .aspectX(1)
-                        .aspectY(2);
+                        .aspectY(1);
             }
         });
         attachToLifecycle(imagePicker2);

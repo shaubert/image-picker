@@ -47,21 +47,29 @@ class Intents {
 
     @SuppressWarnings("deprecation")
     @SuppressLint("NewApi")
-    public static Intent takePhotoIntent(@NonNull File output, String fileProviderAuthority, Context context) {
-        int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
-                ? Intent.FLAG_ACTIVITY_NEW_DOCUMENT
-                : Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                .setFlags(flags);
-        Uri contentUri = SafeFileProvider.getUriForFile(context, fileProviderAuthority, output);
-        List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        for (ResolveInfo resolveInfo : resInfoList) {
-            String packageName = resolveInfo.activityInfo.packageName;
-            context.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    public static Intent takePhotoIntentOrShowError(@NonNull File output,
+                                                    String fileProviderAuthority,
+                                                    Context context,
+                                                    ErrorPresenter errorPresenter) {
+        try {
+            int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                    ? Intent.FLAG_ACTIVITY_NEW_DOCUMENT
+                    : Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    .setFlags(flags);
+            Uri contentUri = SafeFileProvider.getUriForFile(context, fileProviderAuthority, output);
+            List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                context.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
+            return intent;
+        } catch (Exception ex) {
+            errorPresenter.showStorageError(context);
+            return null;
         }
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
-        return intent;
     }
 
 }

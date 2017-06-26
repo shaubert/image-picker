@@ -421,7 +421,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         }
 
         if (tempImageOutput != null) {
-            return Intents.takePhotoIntent(tempImageOutput, getActivity().getPackageName() + AUTHORITY_POSTFIX, getActivity());
+            return Intents.takePhotoIntentOrShowError(
+                    tempImageOutput, getActivity().getPackageName() + AUTHORITY_POSTFIX, getActivity(), errorPresenter);
         } else {
             return null;
         }
