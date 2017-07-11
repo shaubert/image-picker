@@ -8,7 +8,7 @@ Preview images, take photos from camera, pick images from documents, and crop th
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
     }
     dependencies {
-        compile 'com.shaubert.ui.imagepicker:library:0.1.13'
+        compile 'com.shaubert.ui.imagepicker:library:0.2'
     }
 
 ## References
@@ -49,7 +49,7 @@ To pick/crop image:
     imagePicker.setCompressionCallback(new ImagePickerController.CompressionCallback() {
             @Nullable
             @Override
-            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
+            public CompressionOptions getCompressionOptions(@NonNull Uri imageUri) {
                 return CompressionOptions.newBuilder()
                         .maxFileSize(1024 * 200)
                         .targetHeight(512)
@@ -60,20 +60,17 @@ To pick/crop image:
                     
     //optional callback to enable cropping
     imagePicker.setCropCallback(new ImagePickerController.CropCallback() {
-        @Override
-        public boolean shouldCrop(@NonNull File imageFile) {
-            return true;
-        }
-
-        @Override
-        public void setupCropOptions(@NonNull File imageFile, @NonNull CropOptions.Builder builder) {
-            builder.minHeight(200) //if image frame smaller error message will be shown
-                    .minWidth(200) //if image frame smaller error message will be shown
-                    .maxHeight(400) //if image frame bigger image will be downscaled
-                    .maxWidth(400) //if image frame bigger image will be downscaled
-                    .aspectX(1) //image frame aspect ratio
-                    .aspectY(1); //image frame aspect ratio
-        }
+            @Override
+            @Nullable
+            CropOptions.Builder getCropOptions(@NonNull Uri imageUri);
+                return CropOptions.newBuilder()
+                        .minHeight(200) //if image frame smaller error message will be shown
+                        .minWidth(200) //if image frame smaller error message will be shown
+                        .maxHeight(400) //if image frame bigger image will be downscaled
+                        .maxWidth(400) //if image frame bigger image will be downscaled
+                        .aspectX(1) //image frame aspect ratio
+                        .aspectY(1); //image frame aspect ratio
+            }
     });
         
     //you need to attach it to `LifecycleDelegate` or manualy call all `distach*` methods of `LifecycleDispatcher`.
