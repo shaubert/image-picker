@@ -5,10 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.View;
-import com.bumptech.glide.*;
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.target.ViewTarget;
 import com.shaubert.ui.imagepicker.ImageLoader;
 import com.shaubert.ui.imagepicker.ImageTarget;
@@ -19,17 +20,14 @@ public abstract class GlideImageLoader implements ImageLoader {
 
     private Context context;
 
+    @SuppressWarnings("WeakerAccess")
     public GlideImageLoader(Context appContext) {
         this.context = appContext.getApplicationContext();
     }
 
     @Override
-    public void loadImage(final Uri uri, final LoadingCallback<Bitmap> loadingCallback) {
-        BitmapTypeRequest<Uri> request = Glide.with(context)
-                .load(uri)
-                .asBitmap();
-
-        configure(request).into(new SimpleTarget<Bitmap>() {
+    public final void loadImage(final Uri uri, final LoadingCallback<Bitmap> loadingCallback) {
+        loadBitmapWithGlide(uri, new SimpleTarget<Bitmap>() {
             @Override
             public void onLoadStarted(Drawable placeholder) {
                 if (loadingCallback != null) loadingCallback.onLoadingStarted(uri);
@@ -49,15 +47,18 @@ public abstract class GlideImageLoader implements ImageLoader {
         });
     }
 
-    protected abstract BitmapRequestBuilder<Uri, Bitmap> configure(BitmapTypeRequest<Uri> request);
+    @SuppressWarnings("WeakerAccess")
+    protected void loadBitmapWithGlide(Uri uri, Target<Bitmap> target) {
+        Glide.with(context)
+                .load(uri)
+                .asBitmap()
+                .into(target);
+    }
 
     @Override
-    public void loadImage(final Uri uri, final ImageTarget target, final LoadingCallback<Drawable> loadingCallback) {
-        DrawableTypeRequest<Uri> request = Glide.with(target.getView().getContext())
-                .load(uri);
-
-        configure(request)
-                .into(new ViewTarget<View, GlideDrawable>(target.getView()) {
+    public final void loadImage(final Uri uri, final ImageTarget target, final LoadingCallback<Drawable> loadingCallback) {
+        loadDrawableWithGlide(target.getView().getContext(), uri,
+                new ViewTarget<View, GlideDrawable>(target.getView()) {
                     @Override
                     public void onLoadStarted(Drawable placeholder) {
                         if (loadingCallback != null) loadingCallback.onLoadingStarted(uri);
@@ -96,30 +97,40 @@ public abstract class GlideImageLoader implements ImageLoader {
                 });
     }
 
-    protected abstract DrawableRequestBuilder<Uri> configure(DrawableTypeRequest<Uri> request);
-
-    @Override
-    public void save(final Uri uri, final SaveCallback saveCallback) {
+    @SuppressWarnings("WeakerAccess")
+    protected void loadDrawableWithGlide(Context context, Uri uri, Target<GlideDrawable> target) {
         Glide.with(context)
                 .load(uri)
-                .downloadOnly(new SimpleTarget<File>() {
-                    @Override
-                    public void onLoadStarted(Drawable placeholder) {
-                        if (saveCallback != null) saveCallback.onLoadingStarted(uri);
-                        super.onLoadStarted(placeholder);
-                    }
+                .into(target);
+    }
 
-                    @Override
-                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        if (saveCallback != null) saveCallback.onLoadingFailed(uri, e);
-                        super.onLoadFailed(e, errorDrawable);
-                    }
+    @Override
+    public final void save(final Uri uri, final SaveCallback saveCallback) {
+        saveWithGlide(uri, new SimpleTarget<File>() {
+            @Override
+            public void onLoadStarted(Drawable placeholder) {
+                if (saveCallback != null) saveCallback.onLoadingStarted(uri);
+                super.onLoadStarted(placeholder);
+            }
 
-                    @Override
-                    public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                        if (saveCallback != null) saveCallback.onSaved(uri, resource);
-                    }
-                });
+            @Override
+            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                if (saveCallback != null) saveCallback.onLoadingFailed(uri, e);
+                super.onLoadFailed(e, errorDrawable);
+            }
+
+            @Override
+            public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
+                if (saveCallback != null) saveCallback.onSaved(uri, resource);
+            }
+        });
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    protected void saveWithGlide(Uri uri, Target<File> target) {
+        Glide.with(context)
+                .load(uri)
+                .downloadOnly(target);
     }
 
 }
