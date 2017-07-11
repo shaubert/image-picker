@@ -24,27 +24,27 @@ public abstract class GlideImageLoader implements ImageLoader {
     }
 
     @Override
-    public void loadImage(final String url, final LoadingCallback<Bitmap> loadingCallback) {
+    public void loadImage(final Uri uri, final LoadingCallback<Bitmap> loadingCallback) {
         BitmapTypeRequest<Uri> request = Glide.with(context)
-                .load(Uri.parse(url))
+                .load(uri)
                 .asBitmap();
 
         configure(request).into(new SimpleTarget<Bitmap>() {
             @Override
             public void onLoadStarted(Drawable placeholder) {
-                if (loadingCallback != null) loadingCallback.onLoadingStarted(url);
+                if (loadingCallback != null) loadingCallback.onLoadingStarted(uri);
                 super.onLoadStarted(placeholder);
             }
 
             @Override
             public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                if (loadingCallback != null) loadingCallback.onLoadingFailed(url, e);
+                if (loadingCallback != null) loadingCallback.onLoadingFailed(uri, e);
                 super.onLoadFailed(e, errorDrawable);
             }
 
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                if (loadingCallback != null) loadingCallback.onLoadingComplete(url, resource);
+                if (loadingCallback != null) loadingCallback.onLoadingComplete(uri, resource);
             }
         });
     }
@@ -52,27 +52,27 @@ public abstract class GlideImageLoader implements ImageLoader {
     protected abstract BitmapRequestBuilder<Uri, Bitmap> configure(BitmapTypeRequest<Uri> request);
 
     @Override
-    public void loadImage(final String url, final ImageTarget target, final LoadingCallback<Drawable> loadingCallback) {
+    public void loadImage(final Uri uri, final ImageTarget target, final LoadingCallback<Drawable> loadingCallback) {
         DrawableTypeRequest<Uri> request = Glide.with(target.getView().getContext())
-                .load(Uri.parse(url));
+                .load(uri);
 
         configure(request)
                 .into(new ViewTarget<View, GlideDrawable>(target.getView()) {
                     @Override
                     public void onLoadStarted(Drawable placeholder) {
-                        if (loadingCallback != null) loadingCallback.onLoadingStarted(url);
+                        if (loadingCallback != null) loadingCallback.onLoadingStarted(uri);
                         super.onLoadStarted(placeholder);
                     }
 
                     @Override
                     public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        if (loadingCallback != null) loadingCallback.onLoadingFailed(url, e);
+                        if (loadingCallback != null) loadingCallback.onLoadingFailed(uri, e);
                         super.onLoadFailed(e, errorDrawable);
                     }
 
                     @Override
                     public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                        if (loadingCallback != null) loadingCallback.onLoadingComplete(url, resource);
+                        if (loadingCallback != null) loadingCallback.onLoadingComplete(uri, resource);
 
                         if (glideAnimation == null || !glideAnimation.animate(resource, new GlideAnimation.ViewAdapter() {
                             @Override
@@ -99,25 +99,25 @@ public abstract class GlideImageLoader implements ImageLoader {
     protected abstract DrawableRequestBuilder<Uri> configure(DrawableTypeRequest<Uri> request);
 
     @Override
-    public void save(final String url, final SaveCallback saveCallback) {
+    public void save(final Uri uri, final SaveCallback saveCallback) {
         Glide.with(context)
-                .load(Uri.parse(url))
+                .load(uri)
                 .downloadOnly(new SimpleTarget<File>() {
                     @Override
                     public void onLoadStarted(Drawable placeholder) {
-                        if (saveCallback != null) saveCallback.onLoadingStarted(url);
+                        if (saveCallback != null) saveCallback.onLoadingStarted(uri);
                         super.onLoadStarted(placeholder);
                     }
 
                     @Override
                     public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        if (saveCallback != null) saveCallback.onLoadingFailed(url, e);
+                        if (saveCallback != null) saveCallback.onLoadingFailed(uri, e);
                         super.onLoadFailed(e, errorDrawable);
                     }
 
                     @Override
                     public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                        if (saveCallback != null) saveCallback.onSaved(url, resource);
+                        if (saveCallback != null) saveCallback.onSaved(uri, resource);
                     }
                 });
     }

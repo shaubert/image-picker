@@ -1,9 +1,10 @@
 package com.shaubert.ui.imagepicker;
 
-import java.io.File;
+import android.content.Context;
+import android.net.Uri;
 
 public interface Compression {
 
-    boolean compressImage(File source, File destination, CompressionOptions compressionOptions);
+    boolean compressImage(Context context, Uri source, Uri destination, CompressionOptions compressionOptions);
 
 }

@@ -1,5 +1,6 @@
 package com.shaubert.imagepickersample;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,8 +8,6 @@ import android.view.View;
 import android.widget.Toast;
 import com.shaubert.lifecycle.objects.dispatchers.support.LifecycleDispatcherAppCompatActivity;
 import com.shaubert.ui.imagepicker.*;
-
-import java.io.File;
 
 
 public class MainActivity extends LifecycleDispatcherAppCompatActivity {
@@ -35,7 +34,7 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         imagePicker1.setCompressionCallback(new ImagePickerController.CompressionCallback() {
             @Nullable
             @Override
-            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
+            public CompressionOptions getCompressionOptions(@NonNull Uri imageUri) {
                 return CompressionOptions.newBuilder()
                         .maxFileSize(1024 * 200)
                         .targetHeight(512)
@@ -56,14 +55,11 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         viewHolder.getImage4().setOnClickListener(imagePicker2.createImageClickListener());
         imagePicker2.setupViews(new ImageViewTarget(viewHolder.getImage4()), viewHolder.getLoad4Button(), null, null);
         imagePicker2.setCropCallback(new ImagePickerController.CropCallback() {
+            @Nullable
             @Override
-            public boolean shouldCrop(@NonNull File imageFile) {
-                return true;
-            }
-
-            @Override
-            public void setupCropOptions(@NonNull File imageFile, @NonNull CropOptions.Builder builder) {
-                builder.minHeight(50)
+            public CropOptions.Builder getCropOptions(@NonNull Uri imageUri) {
+                return CropOptions.newBuilder()
+                        .minHeight(50)
                         .minWidth(50)
                         .maxHeight(400)
                         .maxWidth(400)
@@ -84,7 +80,7 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         imagePicker3.setCompressionCallback(new ImagePickerController.CompressionCallback() {
             @Nullable
             @Override
-            public CompressionOptions getCompressionOptions(@NonNull File imageFile) {
+            public CompressionOptions getCompressionOptions(@NonNull Uri imageUri) {
                 return CompressionOptions.newBuilder()
                         .maxFileSize(1024 * 200)
                         .build();
@@ -98,15 +94,15 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
         });
         imagePicker3.setListener(new ImagePickerController.ImageListener() {
             @Override
-            public void onImageTaken(File imageFile) {
+            public void onImageTaken(Uri image) {
                 Toast.makeText(MainActivity.this,
-                        "Image taken: " + imageFile.getName() +
-                                "\nSize: " + imageFile.length() / (1024) + "KB",
+                        "Image taken: " + image.toString(),
                         Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onImageLoaded(String imageUri) {
+            public void onImageLoaded(Uri image) {
+
             }
 
             @Override
@@ -126,7 +122,7 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                 "picker-4");
         viewHolder.getImage6().setOnClickListener(imagePicker4.createImageClickListener());
         imagePicker4.setupViews(new ImageViewTarget(viewHolder.getImage6()), viewHolder.getLoad6Button(), null, null);
-        imagePicker4.setImageUrl("http://sipi.usc.edu/database/preview/misc/4.2.06.png");
+        imagePicker4.setImage(Uri.parse("http://sipi.usc.edu/database/preview/misc/4.2.06.png"));
         attachToLifecycle(imagePicker4);
     }
 

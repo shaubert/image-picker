@@ -12,28 +12,23 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.regex.Pattern;
 
 class Files {
 
-    public static final String TAG = Files.class.getSimpleName();
+    private static final String TAG = Files.class.getSimpleName();
 
     private static final SimpleDateFormat PUBLIC_FILE_NAME_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
-    private static final Pattern FILE_NAME_PATTERN = Pattern.compile("[^\\p{L}0-9_\\.]");
 
     //Bound to xml/path.xml
     private static final String IMAGE_PICKER_TEMP_DIR_NAME = "image-picker-temp";
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static File generateTempFileOrShowError(Context context, ErrorPresenter errorPresenter) {
+    static File generateTempFileOrShowError(Context context, ErrorPresenter errorPresenter) {
         File file = generateTempFile(context);
         if (file == null) {
             errorPresenter.showStorageError(context);
@@ -42,7 +37,7 @@ class Files {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static File generatePublicTempFileOrShowError(Context context, String dirName, ErrorPresenter errorPresenter) {
+    static File generatePublicTempFileOrShowError(Context context, String dirName, ErrorPresenter errorPresenter) {
         File file = generatePublicTempFile(dirName);
         if (file == null) {
             errorPresenter.showStorageError(context);
@@ -51,7 +46,7 @@ class Files {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static File generateTempFile(Context context) {
+    static File generateTempFile(Context context) {
         File tempRoot = getTempRoot(context);
         if (tempRoot != null) {
             return new File(tempRoot, UUID.randomUUID().toString());
@@ -60,7 +55,7 @@ class Files {
         }
     }
 
-    public static File getTempRoot(Context context) {
+    static File getTempRoot(Context context) {
         File photosDir = StorageUtils.getCacheDirectory(context);
         if (photosDir != null) {
             File innerDir = new File(photosDir, IMAGE_PICKER_TEMP_DIR_NAME);
@@ -71,20 +66,54 @@ class Files {
         return null;
     }
 
-    public static boolean isTempFile(Context context, File file) {
+    static boolean isTempFile(Context context, File file) {
         File tempRoot = getTempRoot(context);
         if (file == null || tempRoot == null) return false;
         return file.getAbsolutePath().contains(tempRoot.getAbsolutePath());
     }
 
-    public static boolean isPublicFile(File file) {
+    static boolean isTempFile(Context context, String authority, Uri uri) {
+        File tempRoot = getTempRoot(context);
+        if (uri == null || tempRoot == null) return false;
+        if (TextUtils.equals(authority, uri.getAuthority())) {
+            return true;
+        }
+        if (uri.getScheme() != null
+                && uri.getScheme().startsWith("file")
+                && uri.getPath() != null
+                && uri.getPath().contains(IMAGE_PICKER_TEMP_DIR_NAME)) {
+            return true;
+        }
+        return false;
+    }
+
+    @SuppressWarnings({"deprecation", "ResultOfMethodCallIgnored"})
+    public static boolean deleteFile(Context context, Uri uri) {
+        try {
+            return context.getContentResolver().delete(uri, null, null) > 0;
+        } catch (Exception ex1) {
+            try {
+                String path = getPath(context, uri);
+                if (path != null) {
+                    return new File(path).delete();
+                }
+            } catch (Exception ex2) {
+                Log.e(TAG, "failed to delete file", ex1);
+                Log.e(TAG, "failed to delete file", ex2);
+            }
+        }
+
+        return false;
+    }
+
+    static boolean isPublicFile(File file) {
         File photosDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if (photosDir == null || file == null) return false;
         return file.getAbsolutePath().contains(photosDir.getAbsolutePath());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static File generatePublicTempFile(String dirName) {
+    static File generatePublicTempFile(String dirName) {
         File externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if (externalStorage == null) return null;
 
@@ -105,12 +134,14 @@ class Files {
         return resultFile;
     }
 
-    public static boolean copy(File from, File to) {
-        FileInputStream inputStream = null;
-        FileOutputStream outputStream = null;
+    static boolean copy(Context context, Uri from, File to) {
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
         try {
             to.getParentFile().mkdirs();
-            inputStream = new FileInputStream(from);
+            inputStream = context.getContentResolver().openInputStream(from);
+            if (inputStream == null) throw new FileNotFoundException(from.toString());
+
             outputStream = new FileOutputStream(to);
             byte[] buffer = new byte[1024 * 50];
             int len;
@@ -139,6 +170,22 @@ class Files {
         return false;
     }
 
+    static int getFileSize(Context context, Uri uri) {
+        InputStream stream = null;
+        try {
+            stream = context.getContentResolver().openInputStream(uri);
+            return stream != null ? stream.available() : -1;
+        } catch (IOException ignored) {
+            return -1;
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException ignored) {
+                }
+            }
+        }
+    }
 
     /**
      * Get a file path from a Uri. This will get the the path for Storage Access
@@ -149,7 +196,8 @@ class Files {
      * @param uri     The Uri to query.
      * @author paulburke
      */
-    public static String getPath(final Context context, final Uri uri) {
+    @Deprecated
+    static String getPath(final Context context, final Uri uri) {
         try {
             return getPathInternal(context, uri);
         } catch (Exception ex) {
@@ -258,7 +306,7 @@ class Files {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    public static boolean isExternalStorageDocument(Uri uri) {
+    static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
@@ -266,7 +314,7 @@ class Files {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    public static boolean isDownloadsDocument(Uri uri) {
+    static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
@@ -274,7 +322,7 @@ class Files {
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    public static boolean isMediaDocument(Uri uri) {
+    static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 

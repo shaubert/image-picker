@@ -112,13 +112,13 @@ public class CropImageActivity extends FragmentActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         getWindow().getDecorView().setBackground(new ColorDrawable(Color.BLACK));
 
-        ImagePickerConfig.getImageLoader().loadImage(Uri.decode(cropOptions.getInUri().toString()), new ImageLoader.LoadingCallback<Bitmap>() {
+        ImagePickerConfig.getImageLoader().loadImage(cropOptions.getInUri(), new ImageLoader.LoadingCallback<Bitmap>() {
             @Override
-            public void onLoadingStarted(String imageUri) {
+            public void onLoadingStarted(Uri imageUri) {
             }
 
             @Override
-            public void onLoadingComplete(String imageUri, Bitmap loadedImage) {
+            public void onLoadingComplete(Uri imageUri, Bitmap loadedImage) {
                 cropImageView.setImageBitmap(loadedImage);
                 imageSet = true;
 
@@ -136,7 +136,7 @@ public class CropImageActivity extends FragmentActivity {
             }
 
             @Override
-            public void onLoadingFailed(String imageUri, Exception ex) {
+            public void onLoadingFailed(Uri imageUri, Exception ex) {
                 new ToastErrorPresenter().showLoadingError(CropImageActivity.this);
                 finishWithCancel();
             }

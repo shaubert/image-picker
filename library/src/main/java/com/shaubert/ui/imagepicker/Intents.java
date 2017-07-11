@@ -10,7 +10,6 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 
-import java.io.File;
 import java.util.List;
 
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -47,8 +46,7 @@ class Intents {
 
     @SuppressWarnings("deprecation")
     @SuppressLint("NewApi")
-    public static Intent takePhotoIntentOrShowError(@NonNull File output,
-                                                    String fileProviderAuthority,
+    public static Intent takePhotoIntentOrShowError(@NonNull Uri output,
                                                     Context context,
                                                     ErrorPresenter errorPresenter) {
         try {
@@ -57,13 +55,12 @@ class Intents {
                     : Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET;
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                     .setFlags(flags);
-            Uri contentUri = SafeFileProvider.getUriForFile(context, fileProviderAuthority, output);
             List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
             for (ResolveInfo resolveInfo : resInfoList) {
                 String packageName = resolveInfo.activityInfo.packageName;
-                context.grantUriPermission(packageName, contentUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                context.grantUriPermission(packageName, output, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
             }
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, contentUri);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, output);
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
             return intent;
         } catch (Exception ex) {

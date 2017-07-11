@@ -4,12 +4,12 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 import android.view.View;
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
 
 import java.io.File;
 
+@SuppressWarnings("WeakerAccess")
 public class ImagePicker extends LifecycleObjectsGroup {
 
     private ImageTarget imageTarget;
@@ -18,10 +18,10 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private View errorView;
 
     private ImagePickerController controller;
-    private String imageUrl;
-    private String defaultImageUrl;
+    private Uri imageUri;
+    private Uri defaultImageUri;
     private Drawable defaultImageDrawable;
-    private String currentUrl;
+    private Uri currentUri;
     private String tag;
 
     private boolean stopped = true;
@@ -38,8 +38,8 @@ public class ImagePicker extends LifecycleObjectsGroup {
     private ImagePickerController.Callback createControllerCallback() {
         return new ImagePickerController.Callback() {
             @Override
-            public void onImageFileSet(@Nullable File imageFile, boolean userPickedImage) {
-                ImagePicker.this.onImageFileSet(imageFile, userPickedImage);
+            public void onImageUriSet(@Nullable Uri imageUri, boolean userPickedImage) {
+                ImagePicker.this.onImageFileSet(imageUri, userPickedImage);
             }
 
             @Override
@@ -110,18 +110,22 @@ public class ImagePicker extends LifecycleObjectsGroup {
         controller.showAddDialog();
     }
 
+    @SuppressWarnings("unused")
     public void takePhoto() {
         getController().onTakePhotoClicked();
     }
 
+    @SuppressWarnings("unused")
     public void pickPicture() {
         getController().onPickPictureClicked();
     }
 
+    @SuppressWarnings("unused")
     public void removeImage() {
         getController().onRemoveImageClicked();
     }
 
+    @SuppressWarnings("unused")
     public void showImageFullScreen() {
         getController().showImageFullScreen();
     }
@@ -154,22 +158,26 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
     private void setImageTarget(final ImageTarget imageTarget) {
         this.imageTarget = imageTarget;
-        currentUrl = null;
+        currentUri = null;
         if (imageTarget == null) {
             return;
         }
 
-        onImageFileSet(getImageFile(), hasUserImage());
+        onImageFileSet(getImage(), hasUserImage());
         onStateChanged(controller.getState());
     }
 
     private void setDefaultImage() {
-        if (imageTarget == null) return;
+        if (imageTarget == null) {
+            currentUri = null;
+            return;
+        }
 
         if (defaultImageDrawable != null) {
+            currentUri = null;
             imageTarget.setImage(defaultImageDrawable);
         } else {
-            loadImage(defaultImageUrl);
+            loadImage(defaultImageUri);
         }
     }
 
@@ -203,107 +211,109 @@ public class ImagePicker extends LifecycleObjectsGroup {
         }
     }
 
-    public void setDefaultImageUrl(String imageUrl) {
-        defaultImageUrl = imageUrl;
+    @SuppressWarnings("unused")
+    public void setDefaultImageUri(Uri imageUri) {
+        defaultImageUri = imageUri;
         if (!hasImage()) {
-            loadImage(imageUrl);
+            loadImage(imageUri);
         }
     }
 
-    private void onImageFileSet(File imageFile, boolean userPickedImage) {
-        String imageUrl = imageFile != null ? Scheme.FILE.wrap(imageFile.getPath()) : null;
-        if (imageUrl == null
-                || imageUrl.equals(defaultImageUrl)) {
-            this.imageUrl = null;
+    private void onImageFileSet(Uri imageUri, boolean userPickedImage) {
+        if (imageUri == null
+                || imageUri.equals(defaultImageUri)) {
+            this.imageUri = null;
             setDefaultImage();
         } else {
             if (userPickedImage) {
-                this.imageUrl = imageUrl;
+                this.imageUri = imageUri;
             }
-            loadImage(imageUrl);
+            loadImage(imageUri);
         }
     }
 
-    public void setImageUrl(String imageUrl) {
-        if (!TextUtils.equals(this.imageUrl, imageUrl)) {
+    public void setImage(Uri imageUri) {
+        if (!Objects.equals(this.imageUri, imageUri)) {
             controller.clear();
-            this.imageUrl = imageUrl;
-            if (TextUtils.isEmpty(imageUrl)) {
+            this.imageUri = imageUri;
+            if (imageUri == null) {
                 return;
             }
 
-            if (Scheme.FILE.belongsTo(imageUrl)) {
-                File file = new File(Scheme.FILE.crop(imageUrl));
-                if (file.exists()) {
-                    setImageFile(file);
-                    return;
-                }
+            if (!imageUri.toString().startsWith("http")) {
+                controller.setImage(imageUri);
+                return;
             }
 
-            ImagePickerConfig.getImageLoader().save(imageUrl, new ImageLoader.SaveCallback() {
+            ImagePickerConfig.getImageLoader().save(imageUri, new ImageLoader.SaveCallback() {
                 @Override
-                public void onLoadingStarted(String imageUri) {
+                public void onLoadingStarted(Uri imageUri) {
                 }
 
                 @Override
-                public void onSaved(String imageUri, File file) {
+                public void onSaved(Uri imageUri, File file) {
                     if (stopped) return;
 
-                    if (TextUtils.equals(ImagePicker.this.imageUrl, imageUri)) {
-                        setImageFile(file);
+                    if (Objects.equals(ImagePicker.this.imageUri, imageUri)) {
+                        controller.setImage(imageUri);
                     }
                 }
 
                 @Override
-                public void onLoadingFailed(String imageUri, Exception ex) {
+                public void onLoadingFailed(Uri imageUri, Exception ex) {
                 }
             });
         }
     }
 
-    public void setImageFile(File imageFile) {
-        controller.setImageFile(imageFile);
-    }
-
-    private void loadImage(String imageUrl) {
+    private void loadImage(Uri imageUri) {
         if (imageTarget != null) {
-            if (TextUtils.equals(currentUrl, imageUrl)) {
-                controller.onLoadingComplete(imageUrl);
-            } else if (TextUtils.isEmpty(imageUrl)) {
+            if (Objects.equals(currentUri, imageUri)) {
+                controller.onLoadingComplete(imageUri);
+            } else if (imageUri == null) {
+                currentUri = null;
                 imageTarget.setImage(null);
             } else {
-                ImagePickerConfig.getImageLoader().loadImage(imageUrl, imageTarget, new ImageLoader.LoadingCallback<Drawable>() {
+                ImagePickerConfig.getImageLoader().loadImage(imageUri, imageTarget, new ImageLoader.LoadingCallback<Drawable>() {
                     @Override
-                    public void onLoadingStarted(String imageUri) {
+                    public void onLoadingStarted(Uri imageUri) {
                         if (stopped) return;
 
                         controller.onLoadingStarted(imageUri);
                     }
 
                     @Override
-                    public void onLoadingComplete(String imageUri, Drawable loadedImage) {
+                    public void onLoadingComplete(Uri imageUri, Drawable loadedImage) {
                         if (stopped) return;
 
-                        ImagePicker.this.currentUrl = imageUri;
+                        ImagePicker.this.currentUri = imageUri;
                         controller.onLoadingComplete(imageUri);
                     }
 
                     @Override
-                    public void onLoadingFailed(String imageUri, Exception ex) {
+                    public void onLoadingFailed(Uri imageUri, Exception ex) {
                         if (stopped) return;
 
                         controller.onLoadingFailed(imageUri);
+
+                        if (imageUri != defaultImageUri) {
+                            setDefaultImage();
+                        } else {
+                            currentUri = null;
+                            imageTarget.setImage(null);
+                        }
                     }
                 });
             }
         } else {
-            controller.onLoadingComplete(imageUrl);
+            controller.onLoadingComplete(imageUri);
         }
     }
 
+    @SuppressWarnings("unused")
     public void clear() {
-        imageUrl = null;
-        currentUrl = null;
+        imageUri = null;
+        currentUri = null;
         controller.clear();
         setDefaultImage();
     }
@@ -322,6 +332,12 @@ public class ImagePicker extends LifecycleObjectsGroup {
     @Override
     protected void onStart() {
         stopped = false;
+
+        if (imageUri == null) {
+            setDefaultImage();
+        } else if (!Objects.equals(currentUri, imageUri)) {
+            loadImage(imageUri);
+        }
     }
 
     @Override
@@ -333,6 +349,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
         return controller;
     }
 
+    @SuppressWarnings("unused")
     public boolean isPrivatePhotos() {
         return controller.isPrivatePhotos();
     }
@@ -345,38 +362,33 @@ public class ImagePicker extends LifecycleObjectsGroup {
         controller.setCompressionCallback(compressionCallback);
     }
 
-    public File getImageFile() {
-        return controller.getImageFile();
-    }
-
-    public Uri getImageUri() {
-        return controller.getImageUri();
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
+    public Uri getImage() {
+        return controller.getImage();
     }
 
     public boolean currentImageIsDefault() {
-        return !hasImage() && (!TextUtils.isEmpty(defaultImageUrl) || defaultImageDrawable != null);
+        return !hasImage() && (defaultImageUri != null || defaultImageDrawable != null);
     }
 
-    public String getDefaultImageUrl() {
-        return defaultImageUrl;
+    @SuppressWarnings("unused")
+    public Uri getDefaultImageUri() {
+        return defaultImageUri;
     }
 
+    @SuppressWarnings("unused")
     public Drawable getDefaultImageDrawable() {
         return defaultImageDrawable;
     }
 
     public boolean hasImage() {
-        return imageUrl != null && controller.hasImage();
+        return imageUri != null && controller.hasImage();
     }
 
     public boolean hasUserImage() {
         return controller.hasUserImage();
     }
 
+    @SuppressWarnings("unused")
     public void setReadonly(boolean readonly) {
         controller.setReadonly(readonly);
         refreshTakePictureButtonVisibility();

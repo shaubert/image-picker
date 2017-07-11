@@ -2,34 +2,35 @@ package com.shaubert.ui.imagepicker;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 
 import java.io.File;
 
 public interface ImageLoader {
 
-    void loadImage(String url, LoadingCallback<Bitmap> loadingCallback);
+    void loadImage(Uri uri, LoadingCallback<Bitmap> loadingCallback);
 
-    void loadImage(String url, ImageTarget target, LoadingCallback<Drawable> loadingCallback);
+    void loadImage(Uri uri, ImageTarget target, LoadingCallback<Drawable> loadingCallback);
 
-    void save(String url, SaveCallback saveCallback);
+    void save(Uri uri, SaveCallback saveCallback);
 
     interface LoadingCallback<T> {
 
-        void onLoadingStarted(String imageUri);
+        void onLoadingStarted(Uri uri);
 
-        void onLoadingComplete(String imageUri, T loadedImage);
+        void onLoadingComplete(Uri uri, T loadedImage);
 
-        void onLoadingFailed(String imageUri, Exception ex);
+        void onLoadingFailed(Uri uri, Exception ex);
 
     }
 
     interface SaveCallback {
 
-        void onLoadingStarted(String imageUri);
+        void onLoadingStarted(Uri uri);
 
-        void onSaved(String imageUri, File file);
+        void onSaved(Uri uri, File file);
 
-        void onLoadingFailed(String imageUri, Exception ex);
+        void onLoadingFailed(Uri uri, Exception ex);
 
     }
 

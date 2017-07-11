@@ -1,6 +1,7 @@
 package com.shaubert.ui.imagepicker;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -11,7 +12,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.text.TextUtils;
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
 import com.shaubert.m.permission.MultiplePermissionsCallback;
 import com.shaubert.m.permission.PermissionsRequest;
@@ -20,10 +20,11 @@ import com.shaubert.m.permission.SinglePermissionCallback;
 import java.io.File;
 import java.util.Collection;
 
+@SuppressWarnings("WeakerAccess")
 public class ImagePickerController extends LifecycleObjectsGroup {
 
-    private static final String TEMP_IMAGE_OUTPUT_FILE_NAME = "__sh_image_picker_temp_image_output_file_name";
-    private static final String CURRENT_IMAGE_FILE = "__sh_image_picker_current_image_file_extra";
+    private static final String TEMP_IMAGE_OUTPUT_URI = "__sh_image_picker_temp_image_output_uri";
+    private static final String CURRENT_IMAGE_URI = "__sh_image_picker_current_image_uri_extra";
     private static final String STATE = "__sh_image_picker_state_extra";
     private static final String WAITING_FOR_ACTIVITY_RESULT = "__sh_image_picker_waiting_for_activity_result";
     private static final String USER_PICKED_IMAGE = "__sh_image_picker_user_picked_image";
@@ -46,8 +47,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     private EditActionsPresenter editActionsPresenter;
 
     private boolean userPickedImage;
-    private File imageFile;
-    private File tempImageOutput;
+    private Uri imageUri;
+    private Uri tempImageOutput;
 
     private ImageListener listener;
     private Callback callback;
@@ -70,6 +71,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         return new Builder();
     }
 
+    @SuppressLint("InlinedApi")
     private ImagePickerController(final Activity activity, final Fragment fragment, Compression compression,
                                   final ErrorPresenter errorPresenter, EditActionsPresenter editActionsPresenter,
                                   String publicDirectoryName, boolean privatePhotos, String tag) {
@@ -153,31 +155,30 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         return Files.generatePublicTempFileOrShowError(getActivity(), publicDirectoryName, errorPresenter);
     }
 
-    private boolean isTempFile(File file) {
-        return Files.isTempFile(getActivity(), file);
+    private boolean isTempFile(Uri uri) {
+        return Files.isTempFile(getActivity(), getAuthority(), uri);
+    }
+
+    private boolean deleteFile(Uri uri) {
+        return Files.deleteFile(getActivity(), uri);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle stateBundle) {
-        String path = stateBundle.getString(TEMP_IMAGE_OUTPUT_FILE_NAME);
-        if (!TextUtils.isEmpty(path)) {
-            tempImageOutput = new File(path);
-        } else {
-            tempImageOutput = null;
-        }
+        tempImageOutput = stateBundle.getParcelable(TEMP_IMAGE_OUTPUT_URI);
         waitingForActivityResult = stateBundle.getBoolean(WAITING_FOR_ACTIVITY_RESULT, false);
 
         state = Enums.fromBundle(State.class, stateBundle, STATE);
 
-        String imagePath = stateBundle.getString(CURRENT_IMAGE_FILE);
-        if (!TextUtils.isEmpty(imagePath)) {
-            imageFile = new File(imagePath);
+        imageUri = stateBundle.getParcelable(CURRENT_IMAGE_URI);
+        if (imageUri != null) {
             userPickedImage = stateBundle.getBoolean(USER_PICKED_IMAGE, false);
-            if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
+            if (callback != null) callback.onImageUriSet(imageUri, userPickedImage);
         } else {
-            imageFile = null;
             userPickedImage = false;
-            if (callback != null) callback.onImageFileSet(null, userPickedImage);
+            if (callback != null)
+                //noinspection ConstantConditions
+                callback.onImageUriSet(null, userPickedImage);
         }
 
         setState(state);
@@ -186,19 +187,19 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         if (tempImageOutput != null) {
-            outState.putString(TEMP_IMAGE_OUTPUT_FILE_NAME, tempImageOutput.getAbsolutePath());
+            outState.putParcelable(TEMP_IMAGE_OUTPUT_URI, tempImageOutput);
         }
         Enums.toBundle(state, outState, STATE);
-        if (imageFile != null) {
-            outState.putString(CURRENT_IMAGE_FILE, imageFile.getAbsolutePath());
+        if (imageUri != null) {
+            outState.putParcelable(CURRENT_IMAGE_URI, imageUri);
             outState.putBoolean(USER_PICKED_IMAGE, userPickedImage);
         }
         outState.putBoolean(WAITING_FOR_ACTIVITY_RESULT, waitingForActivityResult);
     }
 
-    public void onLoadingFailed(String imageUri) {
-        if (imageFile == null) return;
-        if (!Scheme.FILE.wrap(imageFile.getAbsolutePath()).equals(imageUri)) {
+    public void onLoadingFailed(Uri imageUri) {
+        if (this.imageUri == null) return;
+        if (!this.imageUri.equals(imageUri)) {
             return;
         }
 
@@ -210,9 +211,9 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         }
     }
 
-    public void onLoadingStarted(String imageUri) {
-        if (imageFile == null) return;
-        if (!Scheme.FILE.wrap(imageFile.getAbsolutePath()).equals(imageUri)) {
+    public void onLoadingStarted(Uri imageUri) {
+        if (this.imageUri == null) return;
+        if (!this.imageUri.equals(imageUri)) {
             return;
         }
 
@@ -221,9 +222,9 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         }
     }
 
-    public void onLoadingComplete(String imageUri) {
-        if (imageFile == null) return;
-        if (!Scheme.FILE.wrap(imageFile.getAbsolutePath()).equals(imageUri)) {
+    public void onLoadingComplete(Uri imageUri) {
+        if (this.imageUri == null) return;
+        if (!this.imageUri.equals(imageUri)) {
             return;
         }
 
@@ -232,7 +233,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         if (listener != null) {
             listener.onImageLoaded(imageUri);
             if (oldState == State.PROCESSING) {
-                listener.onImageTaken(getImageFile());
+                listener.onImageTaken(getImage());
             }
         }
     }
@@ -261,60 +262,42 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void removeTempFiles() {
         if (isTempFile(tempImageOutput)) {
-            tempImageOutput.delete();
+            deleteFile(tempImageOutput);
         }
         tempImageOutput = null;
 
-        if (isTempFile(imageFile)) {
-            imageFile.delete();
-            imageFile = null;
+        if (isTempFile(imageUri)) {
+            deleteFile(imageUri);
+            imageUri = null;
             userPickedImage = false;
             setState(State.EMPTY);
-            if (callback != null) callback.onImageFileSet(null, userPickedImage);
+            if (callback != null) callback.onImageUriSet(null, userPickedImage);
         }
     }
 
-    public File getImageFile() {
+    public Uri getImage() {
         if (state == State.WITH_IMAGE) {
-            return imageFile;
+            return imageUri;
         } else {
             return null;
         }
     }
 
-    public void setImageFile(File imageFile) {
-        if (this.imageFile == null || !this.imageFile.equals(imageFile)) {
+    public void setImage(Uri image) {
+        if (this.imageUri == null || !this.imageUri.equals(image)) {
             removeTempFiles();
         }
-        if (this.imageFile == imageFile || (this.imageFile != null && this.imageFile.equals(imageFile))) {
+        if (this.imageUri == image || (this.imageUri != null && this.imageUri.equals(image))) {
             return;
         }
 
-        this.imageFile = imageFile;
+        this.imageUri = image;
         userPickedImage = false;
-        if (imageFile == null) {
+        if (image == null) {
             setState(State.EMPTY);
         } else {
             setState(State.LOADING);
-            if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
-        }
-    }
-
-    public Uri getImageUri() {
-        File imageFile = getImageFile();
-        if (imageFile != null) {
-            return Uri.fromFile(imageFile);
-        } else {
-            return null;
-        }
-    }
-
-    public String getImageUrl() {
-        File imageFile = getImageFile();
-        if (imageFile != null) {
-            return Scheme.FILE.wrap(imageFile.getAbsolutePath());
-        } else {
-            return null;
+            if (callback != null) callback.onImageUriSet(image, userPickedImage);
         }
     }
 
@@ -322,6 +305,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         return state == State.WITH_IMAGE;
     }
 
+    @SuppressWarnings("SimplifiableIfStatement")
     public boolean hasUserImage() {
         if (state == State.WITH_IMAGE) {
             return userPickedImage;
@@ -331,10 +315,10 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     public void showImageFullScreen() {
-        final File imageFile = getImageFile();
+        final Uri imageFile = getImage();
         if (state == State.WITH_IMAGE && imageFile != null && callback != null) {
             ImageTarget sharedImageView = callback.getImageTarget();
-            ImageViewActivity.start(getActivity(), sharedImageView.getView(), getImageUrl());
+            ImageViewActivity.start(getActivity(), sharedImageView.getView(), imageFile);
         }
     }
 
@@ -385,9 +369,9 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     public void retryLoading() {
-        if (state == State.ERROR && imageFile != null) {
+        if (state == State.ERROR && imageUri != null) {
             setState(State.LOADING);
-            if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
+            if (callback != null) callback.onImageUriSet(imageUri, userPickedImage);
         }
     }
 
@@ -401,11 +385,11 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void clear() {
         removeTempFiles();
-        if (imageFile != null) {
-            imageFile = null;
+        if (imageUri != null) {
+            imageUri = null;
             userPickedImage = false;
             setState(State.EMPTY);
-            if (callback != null) callback.onImageFileSet(null, userPickedImage);
+            if (callback != null) callback.onImageUriSet(null, userPickedImage);
         }
     }
 
@@ -419,18 +403,29 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     private Intent getTakePhotoIntentOrShowError() {
+        final File tempFile;
         if (privatePhotos) {
-            tempImageOutput = generateTempFileOrShowError();
+            tempFile = generateTempFileOrShowError();
         } else {
-            tempImageOutput = generatePublicTempFileOrShowError();
+            tempFile = generatePublicTempFileOrShowError();
         }
 
-        if (tempImageOutput != null) {
-            return Intents.takePhotoIntentOrShowError(
-                    tempImageOutput, getActivity().getPackageName() + AUTHORITY_POSTFIX, getActivity(), errorPresenter);
+        if (tempFile != null) {
+            tempImageOutput = getUriForFile(tempFile);
+            return Intents.takePhotoIntentOrShowError(tempImageOutput, getActivity(), errorPresenter);
         } else {
+            tempImageOutput = null;
             return null;
         }
+    }
+
+    private Uri getUriForFile(File tempFile) {
+        return SafeFileProvider.getUriForFile(getActivity(), getAuthority(), tempFile);
+    }
+
+    @NonNull
+    private String getAuthority() {
+        return getActivity().getPackageName() + AUTHORITY_POSTFIX;
     }
 
     @Override
@@ -442,10 +437,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         waitingForActivityResult = false;
         if (resultCode != Activity.RESULT_OK) {
             if (requestCode == REQUEST_CROP) {
-                if (isTempFile(tempImageOutput) && !tempImageOutput.equals(imageFile)) {
-                    //noinspection ResultOfMethodCallIgnored
-                    tempImageOutput.delete();
-                    tempImageOutput = null;
+                if (isTempFile(tempImageOutput) && !tempImageOutput.equals(imageUri)) {
+                    deleteFile(tempImageOutput);
                 }
             }
             return;
@@ -466,91 +459,86 @@ public class ImagePickerController extends LifecycleObjectsGroup {
 
     private void handleTakePhoto(Intent data) {
         Uri dataUri = data != null ? data.getData() : null;
-        final File imageFile;
+        final Uri imageFile;
         if (dataUri != null) {
-            imageFile = getFileFromIntentResult(dataUri, privatePhotos);
+            imageFile = getUriFromIntentResult(dataUri, privatePhotos);
         } else {
             imageFile = tempImageOutput;
         }
         if (!privatePhotos && imageFile != null) {
             MediaScannerConnection.scanFile(getActivity(),
-                    new String[] { imageFile.getAbsolutePath() }, new String[] {"image/jpeg"}, null);
+                    new String[] { imageFile.getPath() }, new String[] {"image/jpeg"}, null);
         }
         processResultImage(imageFile);
     }
 
-    private File getFileFromIntentResult(Uri resultUri, boolean copyAndRemoveSource) {
+    private Uri getUriFromIntentResult(Uri resultUri, boolean copyAndRemoveSource) {
         if (resultUri == null) return null;
 
-        String path = Files.getPath(getActivity(), resultUri);
-        if (TextUtils.isEmpty(path)) {
-            errorPresenter.showFileReadingError(getActivity());
-        } else {
-            File source = new File(path);
-            if (copyAndRemoveSource && !isTempFile(source)) {
-                File output = generateTempFileOrShowError();
-                if (output != null) {
-                    if (Files.copy(source, output)) {
-                        //noinspection ResultOfMethodCallIgnored
-                        source.delete();
-                        return output;
-                    } else {
-                        errorPresenter.showStorageError(getActivity());
-                    }
+        if (copyAndRemoveSource && !isTempFile(resultUri)) {
+            File output = generateTempFileOrShowError();
+            if (output != null) {
+                if (Files.copy(getActivity(), resultUri, output)) {
+                    deleteFile(resultUri);
+                    return getUriForFile(output);
+                } else {
+                    errorPresenter.showStorageError(getActivity());
                 }
-            } else {
-                return source;
             }
+        } else {
+            return resultUri;
         }
+
         return null;
     }
 
     private void handleImagePick(Intent data) {
         Uri dataUri = data != null ? data.getData() : null;
-        File imageFile = getFileFromIntentResult(dataUri, false);
+        Uri imageFile = getUriFromIntentResult(dataUri, false);
         processResultImage(imageFile);
     }
 
-    private void processResultImage(File imageFile) {
-        if (imageFile == null || !imageFile.exists()) {
+    private void processResultImage(Uri imageUri) {
+        if (imageUri == null) {
             errorPresenter.showProcessingError(getActivity());
             return;
         }
 
-        if (cropCallback != null && cropCallback.shouldCrop(imageFile)) {
+        CropOptions.Builder builder = cropCallback != null ? cropCallback.getCropOptions(imageUri) : null;
+        if (builder != null) {
             File cropOutput = generateTempFileOrShowError();
             if (cropOutput == null) {
                 return;
             }
 
-            CropOptions.Builder builder = CropOptions.newBuilder();
-            cropCallback.setupCropOptions(imageFile, builder);
-            builder.inUri(Uri.fromFile(imageFile));
-            builder.outUri(Uri.fromFile(cropOutput));
+            builder.inUri(imageUri);
+            builder.outUri(getUriForFile(cropOutput));
             CropOptions cropOptions = builder.build();
 
             startCrop(cropOptions);
             return;
         }
 
-        processImage(imageFile, isTempFile(imageFile));
+        processImage(imageUri, isTempFile(imageUri));
     }
 
-    private void processImage(File imageFile, boolean removeInputAfter) {
-        CompressionOptions compressionOptions = compressionCallback != null ? compressionCallback.getCompressionOptions(imageFile) : null;
+    private void processImage(Uri imageUri, boolean removeInputAfter) {
+        CompressionOptions compressionOptions = compressionCallback != null ? compressionCallback.getCompressionOptions(imageUri) : null;
         if (compressionOptions != null
                 && compressionOptions.maxFileSize > 0
-                && imageFile.length() > compressionOptions.maxFileSize) {
+                && Files.getFileSize(getActivity(), imageUri) > compressionOptions.maxFileSize) {
             File tempImageScaled = generateTempFileOrShowError();
             if (tempImageScaled != null) {
                 setState(State.PROCESSING);
-                compressImageAsync(imageFile, tempImageScaled, compressionOptions, removeInputAfter);
+                compressImageAsync(imageUri, getUriForFile(tempImageScaled), compressionOptions, removeInputAfter);
             }
         } else {
             setState(State.PROCESSING);
-            onImageProcessingFinished(imageFile);
+            onImageProcessingFinished(imageUri);
         }
     }
+
+
 
     private void startCrop(CropOptions cropOptions) {
         Intent intent = new Intent(getActivity(), ImagePickerConfig.getCropImageActivityClass());
@@ -566,34 +554,25 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             return;
         }
 
-        String inPath = Files.getPath(getActivity(), cropOptions.getInUri());
-        if (!TextUtils.isEmpty(inPath)) {
-            File inFile = new File(inPath);
-            if (isTempFile(inFile)) {
-                //noinspection ResultOfMethodCallIgnored
-                inFile.delete();
-            }
+        if (isTempFile(cropOptions.getInUri())) {
+            deleteFile(cropOptions.getInUri());
         }
 
-        String outPath = Files.getPath(getActivity(), cropOptions.getOutUri());
-        if (!TextUtils.isEmpty(outPath)) {
-            File croppedImageFile = new File(outPath);
-            processImage(croppedImageFile, true);
-        } else {
-            errorPresenter.showProcessingError(getActivity());
-        }
+        processImage(cropOptions.getOutUri(), true);
     }
 
-    private void compressImageAsync(final File input, final File output,
+    private void compressImageAsync(final Uri input, final Uri output,
                                     final CompressionOptions compressionOptions,
                                     final boolean removeInputAfter) {
         new AsyncTask<Void, Void, Boolean>() {
+
+            Activity activity = getActivity();
+
             @Override
             protected Boolean doInBackground(Void... params) {
-                if (compression.compressImage(input, output, compressionOptions)) {
+                if (compression.compressImage(activity, input, output, compressionOptions)) {
                     if (removeInputAfter) {
-                        //noinspection ResultOfMethodCallIgnored
-                        input.delete();
+                        deleteFile(input);
                     }
                     return true;
                 } else {
@@ -616,35 +595,34 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    private void onImageProcessingFinished(File imageFile) {
-        if (isTempFile(this.imageFile)) {
-            //noinspection ResultOfMethodCallIgnored
-            this.imageFile.delete();
+    private void onImageProcessingFinished(Uri imageUri) {
+        if (isTempFile(this.imageUri)) {
+            deleteFile(this.imageUri);
         }
-        this.imageFile = imageFile;
+        this.imageUri = imageUri;
         userPickedImage = true;
-        if (callback != null) callback.onImageFileSet(imageFile, userPickedImage);
+        if (callback != null) //noinspection ConstantConditions
+            callback.onImageUriSet(imageUri, userPickedImage);
     }
 
     public interface ImageListener {
-        void onImageTaken(File imageFile);
-        void onImageLoaded(String imageUri);
+        void onImageTaken(Uri image);
+        void onImageLoaded(Uri image);
         void onImageRemoved();
     }
 
     public interface Callback {
-        void onImageFileSet(@Nullable File imageFile, boolean userPickedImage);
+        void onImageUriSet(@Nullable Uri imageUri, boolean userPickedImage);
         void onStateChanged(State state);
         ImageTarget getImageTarget();
     }
 
     public interface CompressionCallback {
-        @Nullable CompressionOptions getCompressionOptions(@NonNull File imageFile);
+        @Nullable CompressionOptions getCompressionOptions(@NonNull Uri imageUri);
     }
 
     public interface CropCallback {
-        boolean shouldCrop(@NonNull File imageFile);
-        void setupCropOptions(@NonNull File imageFile, @NonNull CropOptions.Builder builder);
+        @Nullable CropOptions.Builder getCropOptions(@NonNull Uri imageUri);
     }
 
     public enum State {
@@ -655,6 +633,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         ERROR,
     }
 
+    @SuppressWarnings({"WeakerAccess", "unused"})
     public static final class Builder {
         private Activity activity;
         private Fragment fragment;
