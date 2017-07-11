@@ -84,8 +84,8 @@ public class CropOptions implements Parcelable {
         private int maxHeight;
         private int aspectX;
         private int aspectY;
-        private Bitmap.CompressFormat compressFormat;
-        private int compressQuality;
+        private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
+        private int compressQuality = 90;
 
         private Builder() {
         }
@@ -138,6 +138,10 @@ public class CropOptions implements Parcelable {
         public Builder compressQuality(int compressQuality) {
             this.compressQuality = compressQuality;
             return this;
+        }
+
+        public Bitmap.CompressFormat getCompressFormat() {
+            return compressFormat;
         }
 
         public CropOptions build() {

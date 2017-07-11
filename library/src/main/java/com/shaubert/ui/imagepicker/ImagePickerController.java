@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -148,11 +149,25 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     private File generateTempFileOrShowError() {
-        return Files.generateTempFileOrShowError(getActivity(), errorPresenter);
+        return generateTempFileOrShowError("jpg");
+    }
+
+    private File generateTempFileOrShowError(String extension) {
+        return Files.generateTempFileOrShowError(getActivity(), extension, errorPresenter);
     }
 
     private File generatePublicTempFileOrShowError() {
         return Files.generatePublicTempFileOrShowError(getActivity(), publicDirectoryName, errorPresenter);
+    }
+
+    private String getExtensionFromCompressFormat(Bitmap.CompressFormat format) {
+        switch (format) {
+            case JPEG: return "jpg";
+            case PNG: return "png";
+            case WEBP: return "webp";
+
+            default: return "jpg";
+        }
     }
 
     private boolean isTempFile(Uri uri) {
@@ -506,7 +521,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
 
         CropOptions.Builder builder = cropCallback != null ? cropCallback.getCropOptions(imageUri) : null;
         if (builder != null) {
-            File cropOutput = generateTempFileOrShowError();
+            File cropOutput = generateTempFileOrShowError(
+                    getExtensionFromCompressFormat(builder.getCompressFormat()));
             if (cropOutput == null) {
                 return;
             }
@@ -521,6 +537,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
 
         processImage(imageUri, isTempFile(imageUri));
     }
+
+
 
     private void processImage(Uri imageUri, boolean removeInputAfter) {
         CompressionOptions compressionOptions = compressionCallback != null ? compressionCallback.getCompressionOptions(imageUri) : null;

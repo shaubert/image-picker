@@ -28,8 +28,8 @@ class Files {
     private static final String IMAGE_PICKER_TEMP_DIR_NAME = "image-picker-temp";
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    static File generateTempFileOrShowError(Context context, ErrorPresenter errorPresenter) {
-        File file = generateTempFile(context);
+    static File generateTempFileOrShowError(Context context, String extension, ErrorPresenter errorPresenter) {
+        File file = generateTempFile(context, extension);
         if (file == null) {
             errorPresenter.showStorageError(context);
         }
@@ -46,10 +46,11 @@ class Files {
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    static File generateTempFile(Context context) {
+    static File generateTempFile(Context context, String extension) {
         File tempRoot = getTempRoot(context);
         if (tempRoot != null) {
-            return new File(tempRoot, UUID.randomUUID().toString());
+            return new File(tempRoot, UUID.randomUUID().toString()
+                    + (TextUtils.isEmpty(extension) ? "" : ("." + extension)));
         } else {
             return null;
         }
