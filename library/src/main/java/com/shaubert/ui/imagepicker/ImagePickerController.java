@@ -2,6 +2,7 @@ package com.shaubert.ui.imagepicker;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
@@ -371,11 +372,15 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     private void startActivityForResult(Intent intent, int requestCode) {
-        waitingForActivityResult = true;
-        if (activity != null) {
-            activity.startActivityForResult(intent, requestCode);
-        } else {
-            fragment.startActivityForResult(intent, requestCode);
+        try {
+            if (activity != null) {
+                activity.startActivityForResult(intent, requestCode);
+            } else {
+                fragment.startActivityForResult(intent, requestCode);
+            }
+            waitingForActivityResult = true;
+        } catch (ActivityNotFoundException ex) {
+            errorPresenter.showActivityNotFoundError(getActivity());
         }
     }
 

@@ -12,4 +12,6 @@ public interface ErrorPresenter {
 
     void showFileReadingError(Context context);
 
+    void showActivityNotFoundError(Context context);
+
 }

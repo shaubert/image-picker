@@ -10,9 +10,9 @@
 
     <string name="sh_image_picker_take_photo_processing_error">Error occurred while processing image</string>
     <string name="sh_image_picker_take_photo_loading_error">Error occurred while loading image</string>
-
     <string name="sh_image_picker_storage_not_available_message">Storage not\u00A0available</string>
     <string name="sh_image_picker_unable_to_read_file_message">Error reading the\u00A0file</string>
+    <string name="sh_image_picker_unable_to_start_intent">You don\'t have an application to handle that</string>
 
     <string name="sh_image_picker_crop_image_too_small">Image is too small</string>
     <string name="sh_image_picker_crop_image_too_small_format">Size should be at least %1$d×%2$d</string>

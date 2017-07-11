@@ -21,4 +21,9 @@ public class ToastErrorPresenter implements ErrorPresenter {
         Toast.makeText(context, R.string.sh_image_picker_unable_to_read_file_message, Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void showActivityNotFoundError(Context context) {
+        Toast.makeText(context, R.string.sh_image_picker_unable_to_start_intent, Toast.LENGTH_SHORT).show();
+    }
+
 }
