@@ -7,8 +7,6 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
 
-import java.io.File;
-
 @SuppressWarnings("WeakerAccess")
 public class ImagePicker extends LifecycleObjectsGroup {
 
@@ -240,29 +238,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
                 return;
             }
 
-            if (!imageUri.toString().startsWith("http")) {
-                controller.setImage(imageUri);
-                return;
-            }
-
-            ImagePickerConfig.getImageLoader().save(imageUri, new ImageLoader.SaveCallback() {
-                @Override
-                public void onLoadingStarted(Uri imageUri) {
-                }
-
-                @Override
-                public void onSaved(Uri imageUri, File file) {
-                    if (stopped) return;
-
-                    if (Objects.equals(ImagePicker.this.imageUri, imageUri)) {
-                        controller.setImage(imageUri);
-                    }
-                }
-
-                @Override
-                public void onLoadingFailed(Uri imageUri, Exception ex) {
-                }
-            });
+            controller.setImage(imageUri);
         }
     }
 

@@ -14,8 +14,6 @@ import com.bumptech.glide.request.target.ViewTarget;
 import com.shaubert.ui.imagepicker.ImageLoader;
 import com.shaubert.ui.imagepicker.ImageTarget;
 
-import java.io.File;
-
 public abstract class GlideImageLoader implements ImageLoader {
 
     private Context context;
@@ -102,35 +100,6 @@ public abstract class GlideImageLoader implements ImageLoader {
         Glide.with(context)
                 .load(uri)
                 .into(target);
-    }
-
-    @Override
-    public final void save(final Uri uri, final SaveCallback saveCallback) {
-        saveWithGlide(uri, new SimpleTarget<File>() {
-            @Override
-            public void onLoadStarted(Drawable placeholder) {
-                if (saveCallback != null) saveCallback.onLoadingStarted(uri);
-                super.onLoadStarted(placeholder);
-            }
-
-            @Override
-            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                if (saveCallback != null) saveCallback.onLoadingFailed(uri, e);
-                super.onLoadFailed(e, errorDrawable);
-            }
-
-            @Override
-            public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
-                if (saveCallback != null) saveCallback.onSaved(uri, resource);
-            }
-        });
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    protected void saveWithGlide(Uri uri, Target<File> target) {
-        Glide.with(context)
-                .load(uri)
-                .downloadOnly(target);
     }
 
 }
