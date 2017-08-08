@@ -223,6 +223,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             errorPresenter.showLoadingError(getActivity());
         } else {
             setState(State.ERROR);
+            errorPresenter.showFileReadingError(getActivity());
         }
     }
 
