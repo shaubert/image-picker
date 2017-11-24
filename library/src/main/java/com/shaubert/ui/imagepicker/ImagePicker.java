@@ -244,11 +244,11 @@ public class ImagePicker extends LifecycleObjectsGroup {
 
     private void loadImage(Uri imageUri) {
         if (imageTarget != null) {
-            if (Objects.equals(currentUri, imageUri)) {
-                controller.onLoadingComplete(imageUri);
-            } else if (imageUri == null) {
+            if (imageUri == null) {
                 currentUri = null;
                 imageTarget.setImage(null);
+            } else if (Objects.equals(currentUri, imageUri)) {
+                controller.onLoadingComplete(imageUri);
             } else {
                 ImagePickerConfig.getImageLoader().loadImage(imageUri, imageTarget, new ImageLoader.LoadingCallback<Drawable>() {
                     @Override
