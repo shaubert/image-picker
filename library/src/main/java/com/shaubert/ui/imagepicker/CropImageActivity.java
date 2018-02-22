@@ -177,6 +177,11 @@ public class CropImageActivity extends FragmentActivity {
 
         if (validateMinSizes()) {
             Bitmap image = cropImageView.getCroppedImage();
+            if (image == null) {
+                Toast.makeText(this, R.string.sh_image_picker_take_photo_processing_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
             int maxWidth = cropOptions.getMaxWidth();
             int maxHeight = cropOptions.getMaxHeight();
             int targetW = maxWidth > 0 ? maxWidth : image.getWidth();
@@ -246,6 +251,11 @@ public class CropImageActivity extends FragmentActivity {
 
     private boolean validateMinSizes() {
         if (!imageSet) return false;
+
+        if (cropImageView.getDrawable() == null) {
+            Toast.makeText(this, R.string.sh_image_picker_take_photo_processing_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
 
         RectF cropRect = cropImageView.getActualCropRect();
         int minWidth = cropOptions.getMinWidth();
