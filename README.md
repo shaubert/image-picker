@@ -8,7 +8,7 @@ Preview images, take photos from camera, pick images from documents, and crop th
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
     }
     dependencies {
-        compile 'com.shaubert.ui.imagepicker:library:0.2.5'
+        compile 'com.shaubert.ui.imagepicker:library:0.2.6'
     }
 
 ## References
