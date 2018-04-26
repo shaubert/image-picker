@@ -16,18 +16,11 @@ class SafeFileProvider {
      * @return uri for file
      */
     static Uri getUriForFile(Context context, String authority, File file) {
-        HuaweiFixedContext fixedContext = new HuaweiFixedContext(context);
-        while (true) {
-            try {
-                return FileProvider.getUriForFile(context, authority, file);
-            } catch (IllegalArgumentException e) {
-                fixedContext.placeDirAtTop++;
-                if (fixedContext.placeDirAtTop >= fixedContext.lastDirsCount) {
-                    break;
-                }
-            }
+        try {
+            return FileProvider.getUriForFile(new HuaweiFixedContext(context), authority, file);
+        } catch (IllegalArgumentException ignored) {
+            return Uri.fromFile(file);
         }
-        return Uri.fromFile(file);
     }
 
     /**
@@ -40,8 +33,6 @@ class SafeFileProvider {
      * external-files-path roots. Here we try to fix this order.
      */
     private static class HuaweiFixedContext extends ContextWrapper {
-        int placeDirAtTop;
-        int lastDirsCount;
 
         public HuaweiFixedContext(Context base) {
             super(base);
@@ -50,11 +41,14 @@ class SafeFileProvider {
         @Override
         public File[] getExternalFilesDirs(String type) {
             File[] dirs = super.getExternalFilesDirs(type);
-            lastDirsCount = dirs.length;
-            if (dirs.length > 1 && dirs.length > placeDirAtTop) {
-                File temp = dirs[0];
-                dirs[0] = dirs[placeDirAtTop];
-                dirs[placeDirAtTop] = temp;
+            File defaultDir = super.getExternalFilesDir(type);
+            if (dirs.length > 0
+                    && defaultDir != null
+                    && !defaultDir.equals(dirs[0])) {
+                File[] newDirs = new File[dirs.length + 1];
+                newDirs[0] = defaultDir;
+                System.arraycopy(dirs, 0, newDirs, 1, dirs.length);
+                dirs = newDirs;
             }
             return dirs;
         }

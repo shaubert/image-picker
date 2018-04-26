@@ -181,7 +181,7 @@ public class CropImageActivity extends FragmentActivity {
                 Toast.makeText(this, R.string.sh_image_picker_take_photo_processing_error, Toast.LENGTH_SHORT).show();
                 return;
             }
-            
+
             int maxWidth = cropOptions.getMaxWidth();
             int maxHeight = cropOptions.getMaxHeight();
             int targetW = maxWidth > 0 ? maxWidth : image.getWidth();
