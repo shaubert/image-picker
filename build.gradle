@@ -15,7 +15,10 @@ allprojects {
     group = GROUP
 
     repositories {
+        maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
         mavenCentral()
+        google()
+        jcenter()
     }
 
     tasks.withType(JavaCompile) {

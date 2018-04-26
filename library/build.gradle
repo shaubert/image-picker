@@ -1,10 +1,5 @@
 apply plugin: 'com.android.library'
 
-repositories {
-    maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
-    google()
-}
-
 dependencies {
     api("com.shaubert.lifecycle.objects:library:1.4") {
         exclude group: "com.android.support"

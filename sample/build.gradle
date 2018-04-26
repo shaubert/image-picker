@@ -1,10 +1,5 @@
 apply plugin: 'com.android.application'
 
-repositories {
-    maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
-    google()
-}
-
 android {
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
