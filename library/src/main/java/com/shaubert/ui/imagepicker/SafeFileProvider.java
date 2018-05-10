@@ -40,17 +40,24 @@ class SafeFileProvider {
 
         @Override
         public File[] getExternalFilesDirs(String type) {
-            File[] dirs = super.getExternalFilesDirs(type);
-            File defaultDir = super.getExternalFilesDir(type);
-            if (dirs.length > 0
-                    && defaultDir != null
-                    && !defaultDir.equals(dirs[0])) {
-                File[] newDirs = new File[dirs.length + 1];
-                newDirs[0] = defaultDir;
-                System.arraycopy(dirs, 0, newDirs, 1, dirs.length);
-                dirs = newDirs;
+            return fixOrderForHuawei(super.getExternalFilesDirs(type), super.getExternalFilesDir(type));
+        }
+
+        @Override
+        public File[] getExternalCacheDirs() {
+            return fixOrderForHuawei(super.getExternalCacheDirs(), super.getExternalCacheDir());
+        }
+
+        private File[] fixOrderForHuawei(File[] originalResult, File shouldBeFirst) {
+            if (originalResult.length > 0
+                    && shouldBeFirst != null
+                    && !shouldBeFirst.equals(originalResult[0])) {
+                File[] newDirs = new File[originalResult.length + 1];
+                newDirs[0] = shouldBeFirst;
+                System.arraycopy(originalResult, 0, newDirs, 1, originalResult.length);
+                return newDirs;
             }
-            return dirs;
+            return originalResult;
         }
     }
 
