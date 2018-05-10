@@ -92,6 +92,11 @@ public abstract class GlideImageLoader implements ImageLoader {
                             target.setImage(resource);
                         }
                     }
+
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {
+                        if (loadingCallback != null) loadingCallback.onLoadingCancelled(uri);
+                    }
                 });
     }
 

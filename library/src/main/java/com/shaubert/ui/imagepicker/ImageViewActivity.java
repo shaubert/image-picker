@@ -71,6 +71,13 @@ public class ImageViewActivity extends Activity {
                 new ToastErrorPresenter().showLoadingError(ImageViewActivity.this);
                 finish();
             }
+
+            @Override
+            public void onLoadingCancelled(Uri uri) {
+                loading = false;
+                new ToastErrorPresenter().showLoadingError(ImageViewActivity.this);
+                finish();
+            }
         });
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

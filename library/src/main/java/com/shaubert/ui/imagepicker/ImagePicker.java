@@ -279,6 +279,14 @@ public class ImagePicker extends LifecycleObjectsGroup {
                             imageTarget.setImage(null);
                         }
                     }
+
+                    @Override
+                    public void onLoadingCancelled(Uri imageUri) {
+                        if (stopped) return;
+
+                        currentUri = null;
+                        imageTarget.setImage(null);
+                    }
                 });
             }
         } else {

@@ -140,6 +140,12 @@ public class CropImageActivity extends FragmentActivity {
                 new ToastErrorPresenter().showLoadingError(CropImageActivity.this);
                 finishWithCancel();
             }
+
+            @Override
+            public void onLoadingCancelled(Uri uri) {
+                new ToastErrorPresenter().showLoadingError(CropImageActivity.this);
+                finishWithCancel();
+            }
         });
     }
 

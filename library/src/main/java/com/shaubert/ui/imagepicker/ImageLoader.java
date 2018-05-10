@@ -18,6 +18,8 @@ public interface ImageLoader {
 
         void onLoadingFailed(Uri uri, Exception ex);
 
+        void onLoadingCancelled(Uri uri);
+
     }
 
 }
