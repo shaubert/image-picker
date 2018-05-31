@@ -4,4 +4,7 @@
     <cache-path name="image-picker-internal" path="image-picker-temp/" />
     <external-cache-path name="image-picker-external" path="image-picker-temp/" />
     <external-path name="image-picker-public" path="Pictures/" />
+
+    <!-- possible fix for huawei devices -->
+    <root-path name="image-picker-root-path" path=""/>
 </paths>
