@@ -64,7 +64,8 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                         .maxHeight(400)
                         .maxWidth(400)
                         .aspectX(1)
-                        .aspectY(1);
+                        .aspectY(1)
+                        .bottomInfoLayout(R.layout.crop_bottom_info_sample);
             }
         });
         attachToLifecycle(imagePicker2);
