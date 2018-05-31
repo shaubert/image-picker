@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -106,7 +107,13 @@ public class CropImageActivity extends FragmentActivity {
         cropImageView = new CropImageView(this);
         cropImageView.setId(R.id.sh_image_picker_crop_image_view);
         content.addView(cropImageView, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+
+        if (cropOptions.getBottomInfoLayout() > 0) {
+            LayoutInflater
+                    .from(content.getContext())
+                    .inflate(cropOptions.getBottomInfoLayout(), content, true);
+        }
 
         setContentView(content, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));

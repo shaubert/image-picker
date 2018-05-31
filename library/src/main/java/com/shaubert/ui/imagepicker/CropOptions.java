@@ -16,6 +16,7 @@ public class CropOptions implements Parcelable {
     private final int aspectY;
     private final Bitmap.CompressFormat compressFormat;
     private final int compressQuality;
+    private final int bottomInfoLayout;
 
     private CropOptions(Builder builder) {
         inUri = builder.inUri;
@@ -28,6 +29,7 @@ public class CropOptions implements Parcelable {
         aspectY = builder.aspectY;
         compressFormat = builder.compressFormat;
         compressQuality = builder.compressQuality;
+        bottomInfoLayout = builder.bottomInfoLayout;
     }
 
     public static Builder newBuilder() {
@@ -74,6 +76,9 @@ public class CropOptions implements Parcelable {
         return compressQuality;
     }
 
+    public int getBottomInfoLayout() {
+        return bottomInfoLayout;
+    }
 
     public static final class Builder {
         private Uri inUri;
@@ -86,6 +91,7 @@ public class CropOptions implements Parcelable {
         private int aspectY;
         private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
         private int compressQuality = 90;
+        private int bottomInfoLayout;
 
         private Builder() {
         }
@@ -140,6 +146,11 @@ public class CropOptions implements Parcelable {
             return this;
         }
 
+        public Builder bottomInfoLayout(int bottomInfoLayout) {
+            this.bottomInfoLayout = bottomInfoLayout;
+            return this;
+        }
+
         public Bitmap.CompressFormat getCompressFormat() {
             return compressFormat;
         }
@@ -173,6 +184,7 @@ public class CropOptions implements Parcelable {
         dest.writeInt(this.aspectY);
         Enums.toParcel(this.compressFormat, dest);
         dest.writeInt(this.compressQuality);
+        dest.writeInt(this.bottomInfoLayout);
     }
 
     private CropOptions(Parcel in) {
@@ -186,6 +198,7 @@ public class CropOptions implements Parcelable {
         this.aspectY = in.readInt();
         this.compressFormat = Enums.fromParcel(Bitmap.CompressFormat.class, in);
         this.compressQuality = in.readInt();
+        this.bottomInfoLayout = in.readInt();
     }
 
     public static final Creator<CropOptions> CREATOR = new Creator<CropOptions>() {
