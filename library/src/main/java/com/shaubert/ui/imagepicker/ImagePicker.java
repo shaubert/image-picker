@@ -372,6 +372,11 @@ public class ImagePicker extends LifecycleObjectsGroup {
         return controller.hasUserImage();
     }
 
+    public boolean hasUserImageOrProcessing() {
+        return controller.hasUserImage()
+                || controller.getState() == ImagePickerController.State.PROCESSING;
+    }
+
     @SuppressWarnings("unused")
     public void setReadonly(boolean readonly) {
         controller.setReadonly(readonly);
