@@ -450,7 +450,12 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             return;
         }
 
-        waitingForActivityResult = false;
+        if (requestCode == REQUEST_PICK
+                || requestCode == REQUEST_TAKE_PHOTO
+                || requestCode == REQUEST_CROP) {
+            waitingForActivityResult = false;
+        }
+
         if (resultCode != Activity.RESULT_OK) {
             if (requestCode == REQUEST_CROP) {
                 if (isTempFile(tempImageOutput) && !tempImageOutput.equals(imageUri)) {
