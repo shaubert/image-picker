@@ -1,34 +1,23 @@
 apply plugin: 'com.android.library'
 
 dependencies {
-    api("com.shaubert.lifecycle.objects:library:1.4") {
-        exclude group: "com.android.support"
-    }
-    implementation('com.shaubert.ui.dialogs:library:1.0.6') {
-        exclude group: "com.android.support"
-    }
-    api('com.shaubert.m.permission:library:1.0.1') {
-        exclude group: "com.android.support"
-    }
-    implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.android.support:recyclerview-v7:27.1.1'
-    implementation 'com.android.support:support-fragment:27.1.1'
+    api("com.shaubert.lifecycle.objects:library:1.5")
+    implementation('com.shaubert.ui.dialogs:library:1.1')
+    api('com.shaubert.m.permission:library:1.1')
+    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.fragment:fragment:1.0.0'
 
-    implementation('com.github.chrisbanes.photoview:library:1.2.4') {
-        exclude group: "com.android.support"
-    }
-    implementation('com.shaubert.edmodo.cropper.fork:library:1.0.5') {
-        exclude group: "com.android.support"
-    }
+    implementation('com.github.chrisbanes.photoview:library:1.2.4')
+    implementation('com.shaubert.edmodo.cropper.fork:library:1.0.5')
 }
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
     }
 }
 
