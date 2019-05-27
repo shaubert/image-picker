@@ -12,17 +12,19 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityOptionsCompat;
 import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import uk.co.senab.photoview.DefaultOnDoubleTapListener;
-import uk.co.senab.photoview.PhotoViewAttacher;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 
 import java.util.List;
+
+import uk.co.senab.photoview.DefaultOnDoubleTapListener;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class ImageViewActivity extends Activity {
 
@@ -166,16 +168,23 @@ public class ImageViewActivity extends Activity {
     }
 
     @SuppressLint("NewApi")
-    public static void start(Activity activity, View sharedImageView, Uri imageUri) {
+    public static void start(Activity activity,
+                             View sharedImageView,
+                             Uri imageUri) {
         Intent intent = new Intent(activity, ImagePickerConfig.getOpenImageActivityClass());
         intent.putExtra(ImageViewActivity.IMAGE_URI_EXTRA, imageUri);
 
-        String transitionName = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? sharedImageView.getTransitionName() : null;
         Bundle activityOptions = null;
-        if (!TextUtils.isEmpty(transitionName)) {
-            intent.putExtra(ImageViewActivity.TRANSITION_NAME_EXTRA, transitionName);
-            activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(activity, sharedImageView, transitionName)
-                            .toBundle();
+        if (sharedImageView != null) {
+            String transitionName = Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                    ? sharedImageView.getTransitionName()
+                    : null;
+            if (!TextUtils.isEmpty(transitionName)) {
+                intent.putExtra(ImageViewActivity.TRANSITION_NAME_EXTRA, transitionName);
+                activityOptions = ActivityOptionsCompat
+                        .makeSceneTransitionAnimation(activity, sharedImageView, transitionName)
+                        .toBundle();
+            }
         }
 
         ActivityCompat.startActivity(activity, intent, activityOptions);

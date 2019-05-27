@@ -334,7 +334,11 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         final Uri imageFile = getImage();
         if (state == State.WITH_IMAGE && imageFile != null && callback != null) {
             ImageTarget sharedImageView = callback.getImageTarget();
-            ImageViewActivity.start(getActivity(), sharedImageView.getView(), imageFile);
+            ImageViewActivity.start(
+                    getActivity(),
+                    sharedImageView != null ? sharedImageView.getView() : null,
+                    imageFile
+            );
         }
     }
 
