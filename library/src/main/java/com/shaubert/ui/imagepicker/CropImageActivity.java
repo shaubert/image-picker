@@ -1,6 +1,7 @@
 package com.shaubert.ui.imagepicker;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,12 +13,14 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.fragment.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+import androidx.fragment.app.FragmentActivity;
+
 import com.edmodo.cropper.CropImageView;
 import com.shaubert.ui.dialogs.ProgressDialogManager;
 
@@ -36,7 +39,7 @@ public class CropImageActivity extends FragmentActivity {
     private ProgressDialogManager progressDialog;
     private boolean imageSet;
 
-    private static AsyncTask<Void, Void, Boolean> cropTask;
+    private static CropTask cropTask;
     private static Boolean cropResult;
     private static Runnable cropCallback;
 
@@ -86,6 +89,17 @@ public class CropImageActivity extends FragmentActivity {
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
 
+        cropImageView = new CropImageView(this);
+        cropImageView.setId(R.id.sh_image_picker_crop_image_view);
+        content.addView(cropImageView, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
+
+        if (cropOptions.getBottomInfoLayout() > 0) {
+            LayoutInflater
+                    .from(content.getContext())
+                    .inflate(cropOptions.getBottomInfoLayout(), content, true);
+        }
+
         DoneCancelView doneCancelView = new DoneCancelView(this);
         doneCancelView.setCallback(new DoneCancelView.Callback() {
             @Override
@@ -103,17 +117,6 @@ public class CropImageActivity extends FragmentActivity {
         content.addView(doneCancelView, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 getResources().getDimensionPixelSize(R.dimen.sh_image_picker_done_cancel_height)));
-
-        cropImageView = new CropImageView(this);
-        cropImageView.setId(R.id.sh_image_picker_crop_image_view);
-        content.addView(cropImageView, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
-
-        if (cropOptions.getBottomInfoLayout() > 0) {
-            LayoutInflater
-                    .from(content.getContext())
-                    .inflate(cropOptions.getBottomInfoLayout(), content, true);
-        }
 
         setContentView(content, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -217,41 +220,7 @@ public class CropImageActivity extends FragmentActivity {
         cancelCropTask();
 
         progressDialog.showDialog();
-        cropTask = new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... params) {
-                OutputStream outputStream = null;
-                try {
-                    outputStream = getContentResolver().openOutputStream(cropOptions.getOutUri());
-                    image.compress(cropOptions.getCompressFormat(), cropOptions.getCompressQuality(), outputStream);
-                    return true;
-                } catch (IOException e) {
-                    Log.e(TAG, "failed to save result image", e);
-                    return false;
-                } finally {
-                    if (outputStream != null) {
-                        try {
-                            outputStream.close();
-                        } catch (IOException ignored) {
-                        }
-                    }
-                }
-            }
-
-            @Override
-            protected void onPostExecute(Boolean result) {
-                image.recycle();
-                cropResult = result;
-                if (cropCallback != null) {
-                    cropCallback.run();
-                }
-            }
-
-            @Override
-            protected void onCancelled() {
-                image.recycle();
-            }
-        };
+        cropTask = new CropTask(image, cropOptions, this.getApplicationContext());
         cropTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -294,6 +263,53 @@ public class CropImageActivity extends FragmentActivity {
 
     public static CropOptions getCropOptions(Intent intent) {
         return intent.getParcelableExtra(CROP_OPTIONS_EXTRA);
+    }
+
+    private static class CropTask extends AsyncTask<Void, Void, Boolean> {
+
+        private Bitmap image;
+        private Context context;
+        private CropOptions cropOptions;
+
+        private CropTask(Bitmap image, CropOptions cropOptions, Context context) {
+            this.image = image;
+            this.context = context.getApplicationContext();
+            this.cropOptions = cropOptions;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            OutputStream outputStream = null;
+            try {
+                outputStream = context.getContentResolver().openOutputStream(cropOptions.getOutUri());
+                image.compress(cropOptions.getCompressFormat(), cropOptions.getCompressQuality(), outputStream);
+                return true;
+            } catch (IOException e) {
+                Log.e(TAG, "failed to save result image", e);
+                return false;
+            } finally {
+                if (outputStream != null) {
+                    try {
+                        outputStream.close();
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            image.recycle();
+            cropResult = result;
+            if (cropCallback != null) {
+                cropCallback.run();
+            }
+        }
+
+        @Override
+        protected void onCancelled() {
+            image.recycle();
+        }
     }
 
 }
