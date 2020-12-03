@@ -17,6 +17,7 @@ public class CropOptions implements Parcelable {
     private final Bitmap.CompressFormat compressFormat;
     private final int compressQuality;
     private final int bottomInfoLayout;
+    private final boolean saveOnDrawError;
 
     private CropOptions(Builder builder) {
         inUri = builder.inUri;
@@ -30,6 +31,7 @@ public class CropOptions implements Parcelable {
         compressFormat = builder.compressFormat;
         compressQuality = builder.compressQuality;
         bottomInfoLayout = builder.bottomInfoLayout;
+        saveOnDrawError = builder.saveOnDrawError;
     }
 
     public static Builder newBuilder() {
@@ -80,6 +82,10 @@ public class CropOptions implements Parcelable {
         return bottomInfoLayout;
     }
 
+    public boolean isSaveOnDrawError() {
+        return saveOnDrawError;
+    }
+
     public static final class Builder {
         private Uri inUri;
         private Uri outUri;
@@ -92,6 +98,7 @@ public class CropOptions implements Parcelable {
         private Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
         private int compressQuality = 90;
         private int bottomInfoLayout;
+        private boolean saveOnDrawError;
 
         private Builder() {
         }
@@ -155,6 +162,11 @@ public class CropOptions implements Parcelable {
             return compressFormat;
         }
 
+        public Builder saveOnDrawError(boolean saveOnDrawError) {
+            this.saveOnDrawError = saveOnDrawError;
+            return this;
+        }
+
         public CropOptions build() {
             if (outUri == null) throw new NullPointerException("you have to specify outUri");
             if (inUri == null) throw new NullPointerException("you have to specify inUri");
@@ -185,6 +197,7 @@ public class CropOptions implements Parcelable {
         Enums.toParcel(this.compressFormat, dest);
         dest.writeInt(this.compressQuality);
         dest.writeInt(this.bottomInfoLayout);
+        dest.writeInt(this.saveOnDrawError ? 1 : 0);
     }
 
     private CropOptions(Parcel in) {
@@ -199,6 +212,7 @@ public class CropOptions implements Parcelable {
         this.compressFormat = Enums.fromParcel(Bitmap.CompressFormat.class, in);
         this.compressQuality = in.readInt();
         this.bottomInfoLayout = in.readInt();
+        this.saveOnDrawError = in.readInt() > 0;
     }
 
     public static final Creator<CropOptions> CREATOR = new Creator<CropOptions>() {

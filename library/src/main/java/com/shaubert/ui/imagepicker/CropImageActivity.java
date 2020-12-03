@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
@@ -89,7 +90,16 @@ public class CropImageActivity extends FragmentActivity {
         LinearLayout content = new LinearLayout(this);
         content.setOrientation(LinearLayout.VERTICAL);
 
-        cropImageView = new CropImageView(this);
+        cropImageView = new CropImageView(this) {
+            @Override
+            protected void onDraw(Canvas canvas) {
+                try {
+                    super.onDraw(canvas);
+                } catch (RuntimeException ex) {
+                    onDrawFailed();
+                }
+            }
+        };
         cropImageView.setId(R.id.sh_image_picker_crop_image_view);
         content.addView(cropImageView, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, 0, 1));
@@ -159,6 +169,20 @@ public class CropImageActivity extends FragmentActivity {
         });
     }
 
+
+    private boolean failedDrawHandled;
+
+    private void onDrawFailed() {
+        if (!failedDrawHandled) {
+            failedDrawHandled = true;
+
+            if (!cropOptions.isSaveOnDrawError() || !saveResult()) {
+                Toast.makeText(this, R.string.sh_image_picker_take_photo_processing_error, Toast.LENGTH_SHORT).show();
+                finishWithCancel();
+            }
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -188,14 +212,14 @@ public class CropImageActivity extends FragmentActivity {
         finish();
     }
 
-    public void saveResult() {
-        if (!imageSet) return;
+    public boolean saveResult() {
+        if (!imageSet) return false;
 
         if (validateMinSizes()) {
             Bitmap image = cropImageView.getCroppedImage();
             if (image == null) {
                 Toast.makeText(this, R.string.sh_image_picker_take_photo_processing_error, Toast.LENGTH_SHORT).show();
-                return;
+                return false;
             }
 
             int maxWidth = cropOptions.getMaxWidth();
@@ -213,6 +237,9 @@ public class CropImageActivity extends FragmentActivity {
                 }
             }
             startCropTask(image);
+            return true;
+        } else  {
+            return false;
         }
     }
 
