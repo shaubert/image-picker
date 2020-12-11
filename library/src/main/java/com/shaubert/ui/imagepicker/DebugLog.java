@@ -4,7 +4,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
-class DebugLog {
+public class DebugLog {
 
     public static final String TAG = DebugLog.class.getSimpleName();
 
