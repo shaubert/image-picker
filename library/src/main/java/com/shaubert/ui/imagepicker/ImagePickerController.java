@@ -156,8 +156,19 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         return Files.generateTempFileOrShowError(getActivity(), extension, errorPresenter);
     }
 
-    private File generatePublicTempFileOrShowError() {
-        return Files.generatePublicTempFileOrShowError(getActivity(), publicDirectoryName, errorPresenter);
+    private File generatePublicTempFileOrShowError(boolean tryToFallbackToPrivateIfError) {
+        File result = Files.generatePublicTempFile(publicDirectoryName);
+        if (result == null) {
+            result = Files.generatePublicTempFile("");
+        }
+        if (result == null) {
+            if (tryToFallbackToPrivateIfError) {
+                result = generateTempFileOrShowError();
+            } else {
+                errorPresenter.showStorageError(getActivity());
+            }
+        }
+        return result;
     }
 
     private String getExtensionFromCompressFormat(Bitmap.CompressFormat format) {
@@ -427,7 +438,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         if (privatePhotos) {
             tempFile = generateTempFileOrShowError();
         } else {
-            tempFile = generatePublicTempFileOrShowError();
+            tempFile = generatePublicTempFileOrShowError(true);
         }
 
         if (tempFile != null) {
@@ -490,7 +501,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         } else {
             imageFile = tempImageOutput;
         }
-        if (!privatePhotos && imageFile != null) {
+        if (!privatePhotos && imageFile != null && !isTempFile(imageFile)) {
             MediaScannerConnection.scanFile(getActivity(),
                     new String[] { imageFile.getPath() }, new String[] {"image/jpeg"}, null);
         }
