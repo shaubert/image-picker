@@ -64,6 +64,7 @@ class Intents {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | FLAG_GRANT_WRITE_URI_PERMISSION);
             return intent;
         } catch (Exception ex) {
+            DebugLog.logError("failed to create take photo intent", ex);
             errorPresenter.showStorageError(context);
             return null;
         }

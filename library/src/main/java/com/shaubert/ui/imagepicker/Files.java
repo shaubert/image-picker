@@ -10,9 +10,13 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.util.Log;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -64,6 +68,7 @@ class Files {
                 return innerDir;
             }
         }
+        DebugLog.logError("getCacheDirectory() is null", null);
         return null;
     }
 
@@ -99,8 +104,8 @@ class Files {
                     return new File(path).delete();
                 }
             } catch (Exception ex2) {
-                Log.e(TAG, "failed to delete file", ex1);
-                Log.e(TAG, "failed to delete file", ex2);
+                DebugLog.logError("failed to delete file", ex1);
+                DebugLog.logError("failed to delete file", ex2);
             }
         }
 
@@ -116,10 +121,17 @@ class Files {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     static File generatePublicTempFile(String dirName) {
         File externalStorage = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        if (externalStorage == null) return null;
+        if (externalStorage == null) {
+            DebugLog.logError("Environment.DIRECTORY_PICTURES is null", null);
+            return null;
+        }
 
         File appPhotosDir = TextUtils.isEmpty(dirName) ? externalStorage : new File(externalStorage, dirName);
         if (!appPhotosDir.exists() && !appPhotosDir.mkdirs()) {
+            DebugLog.logError(
+                    appPhotosDir.getAbsolutePath() + " doesn't exists and can't be created",
+                    null
+            );
             return null;
         }
 
@@ -153,7 +165,7 @@ class Files {
             }
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "failed to copy file", e);
+            DebugLog.logError("failed to copy file", e);
         } finally {
             if (inputStream != null) {
                 try {
@@ -202,7 +214,7 @@ class Files {
         try {
             return getPathInternal(context, uri);
         } catch (Exception ex) {
-            Log.e(TAG, "failed to get path", ex);
+            DebugLog.logError("failed to get path", ex);
             return null;
         }
     }

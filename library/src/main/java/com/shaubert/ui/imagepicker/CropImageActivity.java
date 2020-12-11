@@ -14,7 +14,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -312,7 +311,7 @@ public class CropImageActivity extends FragmentActivity {
                 image.compress(cropOptions.getCompressFormat(), cropOptions.getCompressQuality(), outputStream);
                 return true;
             } catch (IOException e) {
-                Log.e(TAG, "failed to save result image", e);
+                DebugLog.logError("failed to save result image", e);
                 return false;
             } finally {
                 if (outputStream != null) {

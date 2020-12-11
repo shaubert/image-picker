@@ -57,7 +57,7 @@ public class DefaultCompression implements Compression {
             copyExif(context, source, destination);
             return true;
         } catch (IOException e) {
-            Log.e(TAG, "failed to create compressed image", e);
+            DebugLog.logError("failed to create compressed image", e);
         } finally {
             if (boundsStream != null) {
                 try {
