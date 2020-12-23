@@ -7,7 +7,7 @@ import androidx.core.content.FileProvider;
 
 import java.io.File;
 
-class SafeFileProvider extends FileProvider {
+public class SafeFileProvider extends FileProvider {
 
     public SafeFileProvider() {
     }
