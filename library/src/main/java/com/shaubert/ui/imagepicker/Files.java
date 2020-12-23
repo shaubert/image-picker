@@ -144,6 +144,14 @@ class Files {
             i++;
         }
 
+        try {
+            resultFile.createNewFile();
+            resultFile.delete();
+        } catch (IOException e) {
+            DebugLog.logError("Can't create public file", e);
+            return null;
+        }
+
         return resultFile;
     }
 

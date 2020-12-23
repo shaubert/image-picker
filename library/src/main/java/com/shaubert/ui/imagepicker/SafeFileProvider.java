@@ -18,7 +18,8 @@ class SafeFileProvider {
     static Uri getUriForFile(Context context, String authority, File file) {
         try {
             return FileProvider.getUriForFile(new HuaweiFixedContext(context), authority, file);
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException ex) {
+            DebugLog.logError("Failed to get URI", ex);
             return Uri.fromFile(file);
         }
     }
