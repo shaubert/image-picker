@@ -7,7 +7,10 @@ import androidx.core.content.FileProvider;
 
 import java.io.File;
 
-class SafeFileProvider {
+class SafeFileProvider extends FileProvider {
+
+    public SafeFileProvider() {
+    }
 
     /**
      * @param context   context
@@ -15,7 +18,7 @@ class SafeFileProvider {
      * @param file      file
      * @return uri for file
      */
-    static Uri getUriForFile(Context context, String authority, File file) {
+    static Uri getSafeUriForFile(Context context, String authority, File file) {
         try {
             return FileProvider.getUriForFile(new HuaweiFixedContext(context), authority, file);
         } catch (IllegalArgumentException ex) {

@@ -451,7 +451,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     }
 
     private Uri getUriForFile(File tempFile) {
-        return SafeFileProvider.getUriForFile(getActivity(), getAuthority(), tempFile);
+        return SafeFileProvider.getSafeUriForFile(getActivity(), getAuthority(), tempFile);
     }
 
     @NonNull

@@ -13,7 +13,7 @@
             android:theme="@style/Theme.AppCompat.NoActionBar"/>
 
         <provider
-            android:name="androidx.core.content.FileProvider"
+            android:name="com.shaubert.ui.imagepicker.SafeFileProvider"
             android:authorities="${applicationId}.imagepicker.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
