@@ -2,8 +2,10 @@ package com.shaubert.ui.imagepicker;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import androidx.fragment.app.FragmentManager;
 import android.widget.ArrayAdapter;
+
+import androidx.fragment.app.FragmentManager;
+
 import com.shaubert.ui.dialogs.ListDialogManager;
 
 public class EditActionsDialogPresenter implements EditActionsPresenter {
@@ -107,6 +109,12 @@ public class EditActionsDialogPresenter implements EditActionsPresenter {
             }
         });
         dialog.setCancellable(true);
+        dialog.setCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                controller.onActionsDialogCancelled();
+            }
+        });
 
         return dialog;
     }

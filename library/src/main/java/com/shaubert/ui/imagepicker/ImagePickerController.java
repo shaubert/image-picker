@@ -10,9 +10,11 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
 import com.shaubert.m.permission.MultiplePermissionsCallback;
 import com.shaubert.m.permission.PermissionsRequest;
@@ -22,7 +24,7 @@ import java.io.File;
 import java.util.Collection;
 
 @SuppressWarnings("WeakerAccess")
-public class ImagePickerController extends LifecycleObjectsGroup {
+public class ImagePickerController extends LifecycleObjectsGroup implements EditActionsPresenter.CancellationCallback {
 
     private static final String TEMP_IMAGE_OUTPUT_URI = "__sh_image_picker_temp_image_output_uri";
     private static final String CURRENT_IMAGE_URI = "__sh_image_picker_current_image_uri_extra";
@@ -57,6 +59,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
     private String tag;
     private CropCallback cropCallback;
     private CompressionCallback compressionCallback;
+    private CancellationCallback cancellationCallback;
     private boolean privatePhotos;
 
     private State state;
@@ -98,6 +101,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
                     waitingForPermission = false;
                     if (denied.isEmpty()) {
                         takePhoto();
+                    } else {
+                        if (cancellationCallback != null) cancellationCallback.onTakePhotoCancelled();
                     }
                 }
             }
@@ -119,7 +124,7 @@ public class ImagePickerController extends LifecycleObjectsGroup {
 
             @Override
             public void onPermissionDenied(PermissionsRequest request, String permission) {
-
+                if (cancellationCallback != null) cancellationCallback.onPickPhotoCancelled();
             }
         });
         attachToLifecycle(pickPhotoPermissionRequest);
@@ -137,6 +142,10 @@ public class ImagePickerController extends LifecycleObjectsGroup {
 
     public void setCallback(Callback callback) {
         this.callback = callback;
+    }
+
+    public void setCancellationCallback(CancellationCallback cancellationCallback) {
+        this.cancellationCallback = cancellationCallback;
     }
 
     public void setCompressionCallback(CompressionCallback compressionCallback) {
@@ -374,6 +383,8 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         Intent chooser = getTakePhotoIntentOrShowError();
         if (chooser != null) {
             startActivityForResult(chooser, REQUEST_TAKE_PHOTO);
+        } else {
+            if (cancellationCallback != null) cancellationCallback.onTakePhotoCancelled();
         }
     }
 
@@ -477,6 +488,21 @@ public class ImagePickerController extends LifecycleObjectsGroup {
                     deleteFile(tempImageOutput);
                 }
             }
+
+            if (cancellationCallback != null) {
+                switch (requestCode) {
+                    case REQUEST_PICK:
+                        cancellationCallback.onPickPhotoCancelled();
+                        break;
+                    case REQUEST_TAKE_PHOTO:
+                        cancellationCallback.onTakePhotoCancelled();
+                        break;
+                    case REQUEST_CROP:
+                        cancellationCallback.onCropCancelled();
+                        break;
+                }
+            }
+
             return;
         }
 
@@ -644,6 +670,13 @@ public class ImagePickerController extends LifecycleObjectsGroup {
             callback.onImageUriSet(imageUri, userPickedImage);
     }
 
+    @Override
+    public void onActionsDialogCancelled() {
+        if (cancellationCallback != null) {
+            cancellationCallback.onActionsDialogCancelled();
+        }
+    }
+
     public interface ImageListener {
         void onImageTaken(Uri image);
         void onImageLoaded(Uri image);
@@ -654,6 +687,13 @@ public class ImagePickerController extends LifecycleObjectsGroup {
         void onImageUriSet(@Nullable Uri imageUri, boolean userPickedImage);
         void onStateChanged(State state);
         ImageTarget getImageTarget();
+    }
+
+    public interface CancellationCallback {
+        void onTakePhotoCancelled();
+        void onPickPhotoCancelled();
+        void onCropCancelled();
+        void onActionsDialogCancelled();
     }
 
     public interface CompressionCallback {

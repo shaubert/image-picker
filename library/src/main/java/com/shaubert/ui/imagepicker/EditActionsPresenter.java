@@ -10,4 +10,8 @@ public interface EditActionsPresenter {
 
     void showEditNotLoadedImageDialog();
 
+    interface CancellationCallback {
+        void onActionsDialogCancelled();
+    }
+
 }
