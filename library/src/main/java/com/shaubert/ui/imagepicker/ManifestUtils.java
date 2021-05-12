@@ -5,6 +5,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class ManifestUtils {
 
@@ -28,15 +32,13 @@ class ManifestUtils {
     }
 
     public static String[] getPermissionsForCameraApp(Activity activity) {
+        List<String> permissions = new ArrayList<>();
         if (hasPermissionInManifest(activity, Manifest.permission.CAMERA)) {
-            return new String[] {
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.CAMERA,
-            };
-        } else {
-            return new String[] {
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
+            permissions.add(Manifest.permission.CAMERA);
         }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        return permissions.toArray(new String[0]);
     }
 }

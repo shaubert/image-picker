@@ -3,7 +3,7 @@ apply plugin: 'com.android.library'
 dependencies {
     api("com.shaubert.lifecycle.objects:library:1.5")
     implementation('com.shaubert.ui.dialogs:library:1.2')
-    api('com.shaubert.m.permission:library:1.1')
+    api('com.shaubert.m.permission:library:1.1.1')
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.fragment:fragment:1.2.4'
@@ -13,11 +13,11 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 29
+        targetSdkVersion 30
     }
 }
 
