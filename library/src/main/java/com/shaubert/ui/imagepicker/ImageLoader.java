@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 
+import androidx.annotation.Nullable;
+
 public interface ImageLoader {
 
     void loadImage(Uri uri, LoadingCallback<Bitmap> loadingCallback);
@@ -16,7 +18,7 @@ public interface ImageLoader {
 
         void onLoadingComplete(Uri uri, T loadedImage);
 
-        void onLoadingFailed(Uri uri, Exception ex);
+        void onLoadingFailed(Uri uri, @Nullable Exception ex);
 
         void onLoadingCancelled(Uri uri);
 

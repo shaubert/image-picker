@@ -10,10 +10,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
 
@@ -36,7 +38,17 @@ public class ImageViewActivity extends Activity {
         Uri imageUri = getIntent().getParcelableExtra(IMAGE_URI_EXTRA);
         String transitionName = getIntent().getStringExtra(TRANSITION_NAME_EXTRA);
 
-        photoView = new PhotoView(this);
+        photoView = new PhotoView(this) {
+            @Override
+            public void setOnTouchListener(OnTouchListener l) {
+                super.setOnTouchListener(l);
+            }
+
+            @Override
+            public boolean onTouchEvent(MotionEvent event) {
+                return super.onTouchEvent(event);
+            }
+        };
         photoView.setScaleType(SCALE_TYPE);
         setContentView(photoView,
                 new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -56,7 +68,7 @@ public class ImageViewActivity extends Activity {
             }
 
             @Override
-            public void onLoadingFailed(Uri imageUri, Exception ex) {
+            public void onLoadingFailed(Uri imageUri, @Nullable Exception ex) {
                 loading = false;
                 new ToastErrorPresenter().showLoadingError(ImageViewActivity.this);
                 finish();

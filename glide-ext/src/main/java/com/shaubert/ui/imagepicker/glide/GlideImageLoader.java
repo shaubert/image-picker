@@ -5,18 +5,21 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.CustomViewTarget;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.request.target.ViewTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.shaubert.ui.imagepicker.ImageLoader;
 import com.shaubert.ui.imagepicker.ImageTarget;
 
 public abstract class GlideImageLoader implements ImageLoader {
 
-    private Context context;
+    private final Context context;
 
     @SuppressWarnings("WeakerAccess")
     public GlideImageLoader(Context appContext) {
@@ -25,22 +28,25 @@ public abstract class GlideImageLoader implements ImageLoader {
 
     @Override
     public final void loadImage(final Uri uri, final LoadingCallback<Bitmap> loadingCallback) {
-        loadBitmapWithGlide(uri, new SimpleTarget<Bitmap>() {
+        loadBitmapWithGlide(uri, new CustomTarget<Bitmap>() {
             @Override
             public void onLoadStarted(Drawable placeholder) {
                 if (loadingCallback != null) loadingCallback.onLoadingStarted(uri);
-                super.onLoadStarted(placeholder);
             }
 
             @Override
-            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                if (loadingCallback != null) loadingCallback.onLoadingFailed(uri, e);
-                super.onLoadFailed(e, errorDrawable);
-            }
-
-            @Override
-            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                 if (loadingCallback != null) loadingCallback.onLoadingComplete(uri, resource);
+            }
+
+            @Override
+            public void onLoadCleared(@Nullable Drawable placeholder) {
+                if (loadingCallback != null) loadingCallback.onLoadingCancelled(uri);
+            }
+
+            @Override
+            public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                if (loadingCallback != null) loadingCallback.onLoadingFailed(uri, null);
             }
         });
     }
@@ -48,32 +54,43 @@ public abstract class GlideImageLoader implements ImageLoader {
     @SuppressWarnings("WeakerAccess")
     protected void loadBitmapWithGlide(Uri uri, Target<Bitmap> target) {
         Glide.with(context)
-                .load(uri)
                 .asBitmap()
+                .load(uri)
                 .into(target);
     }
 
     @Override
     public final void loadImage(final Uri uri, final ImageTarget target, final LoadingCallback<Drawable> loadingCallback) {
         loadDrawableWithGlide(target.getView().getContext(), uri,
-                new ViewTarget<View, GlideDrawable>(target.getView()) {
+                new CustomViewTarget<View, Drawable>(target.getView()) {
                     @Override
-                    public void onLoadStarted(Drawable placeholder) {
+                    protected void onResourceCleared(@Nullable Drawable placeholder) {
+                        target.setImage(placeholder);
+
+                        if (loadingCallback != null) loadingCallback.onLoadingCancelled(uri);
+                    }
+
+                    @Override
+                    protected void onResourceLoading(@Nullable Drawable placeholder) {
+                        if (placeholder != null) {
+                            target.setImage(placeholder);
+                        }
+
                         if (loadingCallback != null) loadingCallback.onLoadingStarted(uri);
-                        super.onLoadStarted(placeholder);
                     }
 
                     @Override
-                    public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                        if (loadingCallback != null) loadingCallback.onLoadingFailed(uri, e);
-                        super.onLoadFailed(e, errorDrawable);
+                    public void onLoadFailed(@Nullable Drawable errorDrawable) {
+                        if (errorDrawable != null) {
+                            target.setImage(errorDrawable);
+                        }
+
+                        if (loadingCallback != null) loadingCallback.onLoadingFailed(uri, null);
                     }
 
                     @Override
-                    public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                        if (loadingCallback != null) loadingCallback.onLoadingComplete(uri, resource);
-
-                        if (glideAnimation == null || !glideAnimation.animate(resource, new GlideAnimation.ViewAdapter() {
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        if (transition == null || !transition.transition(resource, new Transition.ViewAdapter() {
                             @Override
                             public View getView() {
                                 return target.getView();
@@ -91,17 +108,15 @@ public abstract class GlideImageLoader implements ImageLoader {
                         })) {
                             target.setImage(resource);
                         }
-                    }
 
-                    @Override
-                    public void onLoadCleared(Drawable placeholder) {
-                        if (loadingCallback != null) loadingCallback.onLoadingCancelled(uri);
+                        if (loadingCallback != null) loadingCallback.onLoadingComplete(uri, resource);
                     }
                 });
+
     }
 
     @SuppressWarnings("WeakerAccess")
-    protected void loadDrawableWithGlide(Context context, Uri uri, Target<GlideDrawable> target) {
+    protected void loadDrawableWithGlide(Context context, Uri uri, Target<Drawable> target) {
         Glide.with(context)
                 .load(uri)
                 .into(target);

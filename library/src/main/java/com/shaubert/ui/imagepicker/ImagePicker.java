@@ -2,9 +2,11 @@ package com.shaubert.ui.imagepicker;
 
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import android.view.View;
+
 import com.shaubert.lifecycle.objects.LifecycleObjectsGroup;
 
 @SuppressWarnings("WeakerAccess")
@@ -267,7 +269,7 @@ public class ImagePicker extends LifecycleObjectsGroup {
                     }
 
                     @Override
-                    public void onLoadingFailed(Uri imageUri, Exception ex) {
+                    public void onLoadingFailed(Uri imageUri, @Nullable Exception ex) {
                         if (stopped) return;
 
                         controller.onLoadingFailed(imageUri);

@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 
 import com.edmodo.cropper.CropImageView;
@@ -155,7 +156,7 @@ public class CropImageActivity extends FragmentActivity {
             }
 
             @Override
-            public void onLoadingFailed(Uri imageUri, Exception ex) {
+            public void onLoadingFailed(Uri imageUri, @Nullable Exception ex) {
                 new ToastErrorPresenter().showLoadingError(CropImageActivity.this);
                 finishWithCancel();
             }

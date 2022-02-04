@@ -4,6 +4,8 @@ import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 public class ImageViewTarget implements ImageTarget {
 
     private ImageView imageView;
@@ -13,7 +15,7 @@ public class ImageViewTarget implements ImageTarget {
     }
 
     @Override
-    public void setImage(Drawable drawable) {
+    public void setImage(@Nullable Drawable drawable) {
         imageView.setImageDrawable(drawable);
     }
 
@@ -23,7 +25,7 @@ public class ImageViewTarget implements ImageTarget {
     }
 
     @Override
-    public Drawable getCurrentImage() {
+    public @Nullable Drawable getCurrentImage() {
         return imageView.getDrawable();
     }
 
