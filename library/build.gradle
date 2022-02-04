@@ -2,18 +2,18 @@ apply plugin: 'com.android.library'
 
 dependencies {
     api("com.shaubert.lifecycle.objects:library:1.5")
-    implementation('com.shaubert.ui.dialogs:library:1.2')
+    implementation('com.shaubert.ui.dialogs:library:1.2.1')
     api('com.shaubert.m.permission:library:1.1.1')
-    implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.fragment:fragment:1.2.4'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.fragment:fragment:1.4.1'
 
-    implementation('com.github.chrisbanes.photoview:library:1.2.4')
+    implementation('com.github.chrisbanes:PhotoView:2.3.0')
     implementation('com.shaubert.edmodo.cropper.fork:library:1.0.6')
 }
 
 android {
-    compileSdkVersion 30
+    compileSdkVersion 31
 
     defaultConfig {
         minSdkVersion 14

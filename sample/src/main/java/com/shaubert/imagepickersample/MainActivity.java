@@ -2,12 +2,19 @@ package com.shaubert.imagepickersample;
 
 import android.net.Uri;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.shaubert.lifecycle.objects.dispatchers.support.LifecycleDispatcherAppCompatActivity;
-import com.shaubert.ui.imagepicker.*;
+import com.shaubert.ui.imagepicker.CompressionOptions;
+import com.shaubert.ui.imagepicker.CropOptions;
+import com.shaubert.ui.imagepicker.EditActionsDialogPresenter;
+import com.shaubert.ui.imagepicker.ImagePicker;
+import com.shaubert.ui.imagepicker.ImagePickerController;
+import com.shaubert.ui.imagepicker.ImageViewTarget;
 
 
 public class MainActivity extends LifecycleDispatcherAppCompatActivity {
@@ -123,7 +130,7 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
                 "picker-4");
         viewHolder.getImage6().setOnClickListener(imagePicker4.createImageClickListener());
         imagePicker4.setupViews(new ImageViewTarget(viewHolder.getImage6()), viewHolder.getLoad6Button(), null, null);
-        imagePicker4.setImage(Uri.parse("http://sipi.usc.edu/database/preview/misc/4.2.06.png"));
+        imagePicker4.setImage(Uri.parse("https://sipi.usc.edu/database/preview/misc/4.2.06.png"));
         attachToLifecycle(imagePicker4);
     }
 

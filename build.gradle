@@ -1,14 +1,16 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
         google()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'com.android.tools.build:gradle:7.1.0'
+        classpath("com.dipien:bye-bye-jetifier:1.2.2")
     }
 }
+
+apply plugin: "com.dipien.byebyejetifier"
 
 allprojects {
     version = VERSION_NAME
@@ -18,7 +20,9 @@ allprojects {
         maven{url "https://github.com/shaubert/maven-repo/raw/master/releases"}
         mavenCentral()
         google()
-        jcenter()
+        repositories {
+            maven { url "https://www.jitpack.io" }
+        }
     }
 
     tasks.withType(JavaCompile) {
