@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -389,8 +390,12 @@ public class ImagePickerController extends LifecycleObjectsGroup implements Edit
     }
 
     public void onPickPictureClicked() {
-        waitingForPermission = true;
-        pickPhotoPermissionRequest.request();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pickPicture();
+        } else {
+            waitingForPermission = true;
+            pickPhotoPermissionRequest.request();
+        }
     }
 
     private void pickPicture() {

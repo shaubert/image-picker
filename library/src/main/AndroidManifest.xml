@@ -6,11 +6,13 @@
 
         <activity
             android:name=".CropImageActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:exported="false"/>
 
         <activity
             android:name=".ImageViewActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar"/>
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:exported="false"/>
 
         <provider
             android:name="com.shaubert.ui.imagepicker.SafeFileProvider"
