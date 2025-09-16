@@ -7,6 +7,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.shaubert.lifecycle.objects.dispatchers.support.LifecycleDispatcherAppCompatActivity;
 import com.shaubert.ui.imagepicker.CompressionOptions;
@@ -24,6 +27,21 @@ public class MainActivity extends LifecycleDispatcherAppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ViewCompat.setOnApplyWindowInsetsListener(
+                findViewById(R.id.root), (v, windowInsets) -> {
+                    Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    v.setPadding(
+                            insets.left,
+                            insets.top,
+                            insets.right,
+                            insets.bottom
+                    );
+                    // Return CONSUMED if you don't want the window insets to keep passing
+                    // down to descendant views.
+                    return WindowInsetsCompat.CONSUMED;
+                }
+        );
 
         ActivityMainHolder viewHolder = new ActivityMainHolder(this);
 

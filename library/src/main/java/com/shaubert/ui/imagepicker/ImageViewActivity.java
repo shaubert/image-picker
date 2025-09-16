@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.view.WindowCompat;
 
 import com.github.chrisbanes.photoview.PhotoView;
 
@@ -34,6 +35,7 @@ public class ImageViewActivity extends Activity {
     @SuppressLint("NewApi")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.enableEdgeToEdge(getWindow());
 
         Uri imageUri = getIntent().getParcelableExtra(IMAGE_URI_EXTRA);
         String transitionName = getIntent().getStringExtra(TRANSITION_NAME_EXTRA);
@@ -84,10 +86,7 @@ public class ImageViewActivity extends Activity {
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(Color.BLACK);
-            photoView.setTransitionName(transitionName);
-        }
+        photoView.setTransitionName(transitionName);
     }
 
     @SuppressLint("NewApi")

@@ -7,11 +7,11 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -20,13 +20,20 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.edmodo.cropper.CropImageView;
+import com.edmodo.cropper.cropwindow.edge.Edge;
 import com.shaubert.ui.dialogs.ProgressDialogManager;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
 
 public class CropImageActivity extends FragmentActivity {
 
@@ -65,10 +72,7 @@ public class CropImageActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(Color.BLACK);
-        }
+        WindowCompat.enableEdgeToEdge(getWindow());
 
         progressDialog = new ProgressDialogManager(this, "crop-progress");
         progressDialog.setMessage(getText(R.string.sh_image_picker_crop_image_processing));
@@ -91,13 +95,36 @@ public class CropImageActivity extends FragmentActivity {
         content.setOrientation(LinearLayout.VERTICAL);
 
         cropImageView = new CropImageView(this) {
+            private Rect tempRect = new Rect();
+            private List<Rect> exclusionRects = Collections.singletonList(tempRect);
+
+            @Override
+            protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+                super.onLayout(changed, left, top, right, bottom);
+                invalidate();
+            }
+
             @Override
             protected void onDraw(Canvas canvas) {
                 try {
                     super.onDraw(canvas);
+                    updateExclusionRects();
                 } catch (RuntimeException ex) {
                     onDrawFailed();
                 }
+            }
+
+            private void updateExclusionRects() {
+                int extra = this.getContext().getResources().getDimensionPixelSize(
+                        R.dimen.sh_image_picker_crop_frame_exclusion_extra
+                );
+                tempRect.set(
+                        (int) Edge.LEFT.getCoordinate(),
+                        (int) Edge.TOP.getCoordinate() - extra,
+                        (int) Edge.RIGHT.getCoordinate(),
+                        (int) Edge.BOTTOM.getCoordinate() + extra
+                );
+                ViewCompat.setSystemGestureExclusionRects(this, exclusionRects);
             }
         };
         cropImageView.setId(R.id.sh_image_picker_crop_image_view);
@@ -124,6 +151,22 @@ public class CropImageActivity extends FragmentActivity {
                 return false;
             }
         });
+        ViewCompat.setOnApplyWindowInsetsListener(
+                doneCancelView, (v, windowInsets) -> {
+                    Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    ViewGroup.LayoutParams lp = v.getLayoutParams();
+                    if (lp instanceof ViewGroup.MarginLayoutParams) {
+                        ((ViewGroup.MarginLayoutParams) lp).leftMargin = insets.left;
+                        ((ViewGroup.MarginLayoutParams) lp).bottomMargin = insets.bottom;
+                        ((ViewGroup.MarginLayoutParams) lp).rightMargin = insets.right;
+                        v.setLayoutParams(lp);
+                    }
+                    // Return CONSUMED if you don't want the window insets to keep passing
+                    // down to descendant views.
+                    return WindowInsetsCompat.CONSUMED;
+                }
+        );
+
         content.addView(doneCancelView, new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 getResources().getDimensionPixelSize(R.dimen.sh_image_picker_done_cancel_height)));

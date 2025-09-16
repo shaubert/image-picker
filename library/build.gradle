@@ -4,21 +4,30 @@ dependencies {
     api("com.shaubert.lifecycle.objects:library:1.5")
     implementation('com.shaubert.ui.dialogs:library:1.2.1')
     api('com.shaubert.m.permission:library:1.1.1')
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'androidx.fragment:fragment:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.fragment:fragment:1.8.9'
+    implementation 'androidx.core:core:1.17.0'
 
     implementation('com.github.chrisbanes:PhotoView:2.3.0')
     implementation('com.shaubert.edmodo.cropper.fork:library:1.0.6')
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 36
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 33
+        minSdkVersion 21
+        targetSdkVersion 36
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+//            withJavadocJar()
+        }
+    }
+
+    namespace "com.shaubert.ui.imagepicker"
 }
 
 apply from: '../maven_push.gradle'

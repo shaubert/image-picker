@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="sh_image_picker_done_cancel_height">48dp</dimen>
+    <dimen name="sh_image_picker_crop_frame_exclusion_extra">32dp</dimen>
 </resources>

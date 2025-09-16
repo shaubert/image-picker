@@ -560,7 +560,7 @@ public class ImagePickerController extends LifecycleObjectsGroup implements Edit
     }
 
     private void handleImagePick(Intent data) {
-        Uri dataUri = data != null ? data.getData() : null;
+        Uri dataUri = Intents.getPickImageResult(Activity.RESULT_OK, data);
         Uri imageFile = getUriFromIntentResult(dataUri, false);
         processResultImage(imageFile);
     }

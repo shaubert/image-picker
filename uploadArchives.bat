@@ -1,2 +1,2 @@
-CALL gradlew build uploadArchives
+CALL gradlew build publish
 PAUSE
